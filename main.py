@@ -114,9 +114,14 @@ def parseAndExtractFrames(text,peopleWords=["doctor"]):
 
   # coref clusters
   clusters = getPeopleClusters(doc,peopleWords=peopleWords)
+  # clusters is a list of neuralcoref.Cluster s (which is essentially a
+  # list of spacy Spans which represent the mentions -- along with a "main" mention)
+  # clusters[0] is the list of mentions, clusters[0][0] is the first mention (spacy Span)
+  # clusters[0].main is the main mention (e.g., name)
 
   # get verbs
   verbs = findVerbPhrases(doc)
+  # rn this is just a list of spacy tokens
   
   # matching people mentions to verbs
   mention2verbs = {}
