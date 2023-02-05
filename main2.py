@@ -199,6 +199,7 @@ class ConnoFramer:
 
         for _text, _id in zip(texts, text_ids):
 
+            # TODO: replace with a visual loading bar
             if j % 100 == 0:
                 print(str(datetime.now())[:-7] + ' Processed ' + str(j) + ' out of ' + str(len(texts)))
             j += 1
@@ -217,6 +218,8 @@ class ConnoFramer:
             for _persona, _power_score_dict in _persona_score_dict.items():
                 persona_score_dict[_persona]['positive'] += _power_score_dict['positive']
                 persona_score_dict[_persona]['negative'] += _power_score_dict['negative']
+
+        print(str(datetime.now())[:-7] + ' Complete!')
 
         return persona_score_dict, id_persona_score_dict, id_persona_count_dict, id_nsubj_verb_count_dict, id_dobj_verb_count_dict
 
