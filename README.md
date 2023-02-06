@@ -34,16 +34,16 @@ Command to run main.py: `python3 main.py --input_file fakeStories.csv`
 
 <br>
 
-## To Do
+## To Do 🗒️
 
 - Before ACL demo dealine:
-   - adding agency
-   - adding other connotation frames (possibly)
-   - add methods to get e.g. all the docs in which a persona was referenced, all the docs in which a verb was used
-   - return the list of matched verbs (also easier if driven by test cases)?
-   - add in more people lists other than doctor (that's going to be easier if driven by test cases)
-   - adding in wildcard matches (related to conjugation?)
+   - 🔲 adding agency
+   - 🔲 adding other connotation frames (possibly)
+   - 🔲 add methods to get e.g. all the docs in which a persona was referenced, all the docs in which a verb was used
+   - 🔲 return the list of matched verbs (also easier if driven by test cases)?
+   - 🔲 add in more people lists other than doctor (that's going to be easier if driven by test cases)
+   - 🔲 adding in wildcard matches (related to conjugation?)
 - If time before ACL demo deadline, but probably afterwards
-   - adding other verb-related lexica (Verbnet??)
-   - add in weighted lexicon (not sure what the goal would here, but a possible extension, esp. if someone ends up using a model to create a lexicon?)
+   - 🔲 adding other verb-related lexica (Verbnet??)
+   - 🔲 add in weighted lexicon (not sure what the goal would here, but a possible extension, esp. if someone ends up using a model to create a lexicon?)
 
