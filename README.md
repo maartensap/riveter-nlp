@@ -1,6 +1,8 @@
 # ConnotationFramer
+
 Package to extract connotation frames
 
+<br><br>
 
 ## Installation
 
@@ -12,6 +14,7 @@ Package to extract connotation frames
 
 (alternatively: Note, this requires [NeuralCoref](https://github.com/huggingface/neuralcoref), which I had to install by downloading the git repo)
 
+<br><br>
 
 ## Usage
 
@@ -28,6 +31,7 @@ persona_score_dict = framer.get_score_totals()
 ### main.py
 Command to run main.py: `python3 main.py --input_file fakeStories.csv`
 
+<br><br>
 
 ## To Do
 
