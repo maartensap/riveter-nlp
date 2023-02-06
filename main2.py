@@ -26,12 +26,16 @@ class ConnoFramer:
         self.id_dobj_verb_count_dict = {}
 
 
-    def train(self, lexicon_path, data_path, text_column, id_column):
+    # def train(self, lexicon_path, data_path, text_column, id_column):
+    def train(self, lexicon_path, texts, text_ids):
         """
         TODO: need to handle agency (and other lexicons too?)
+        TODO: maybe require a dataframe as input instead of data_path? --> trying this now
         """
         self.verb_label_dict = self.__get_verb_power_dict(lexicon_path) 
-        self.texts, self.text_ids = self.__loadFile(data_path, text_column, id_column)
+        # self.texts, self.text_ids = self.__loadFile(data_path, text_column, id_column)
+        self.texts = texts
+        self.text_ids = text_ids
         self.persona_score_dict, \
             self.id_persona_score_dict, \
             self.id_persona_count_dict, \
@@ -44,6 +48,11 @@ class ConnoFramer:
 
     def get_scores_for_doc(self, doc_id):
         return self.id_persona_score_dict[doc_id]
+
+
+    # TODO: this would be helpful for debugging and result inspection
+    # def get_docs_for_persona(self, persona):
+
 
 
     def count_personas_for_doc(self, doc_id):
@@ -196,11 +205,12 @@ class ConnoFramer:
         id_persona_count_dict = {}
 
         j = 0
+        percent_size = int(len(texts) / 100)
 
         for _text, _id in zip(texts, text_ids):
 
             # TODO: replace with a visual loading bar
-            if j % 100 == 0:
+            if percent_size != 0 and j % percent_size == 0:
                 print(str(datetime.now())[:-7] + ' Processed ' + str(j) + ' out of ' + str(len(texts)))
             j += 1
             
