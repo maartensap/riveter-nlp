@@ -19,6 +19,7 @@ ner_tags = ["PERSON"]
 class ConnoFramer:
 
     def __init__(self):
+        self.verb_score_dict = {}
         self.persona_score_dict = {}
         self.id_persona_score_dict = {}
         self.id_persona_count_dict = {}
@@ -26,21 +27,38 @@ class ConnoFramer:
         self.id_dobj_verb_count_dict = {}
 
 
-    # def train(self, lexicon_path, data_path, text_column, id_column):
-    def train(self, lexicon_path, texts, text_ids):
-        """
-        TODO: need to handle agency (and other lexicons too?)
-        TODO: maybe require a dataframe as input instead of data_path? --> trying this now
-        """
-        self.verb_label_dict = self.__get_verb_power_dict(lexicon_path) 
-        # self.texts, self.text_ids = self.__loadFile(data_path, text_column, id_column)
+    def __get_lemma_spacy(self, verb):
+        verb = verb.split()[0]
+        _lemmas = lemmatizer(verb, 'VERB')
+        return _lemmas[0]
+
+
+    def load_lexicon(self, lexicon_path, verb_column, label_column, label_dict={'power_agent': {'agent': 1, 'theme': 0}, 
+                                                                                'power_theme': {'agent': 0, 'theme': 1},
+                                                                                'power_equal': {'agent': 0, 'theme': 0},
+                                                                                'agency_pos': {'agent': 1, 'theme': 0},
+                                                                                'agency_neg': {'agent': -1, 'theme': 0},
+                                                                                'agency_equal': {'agent': 0, 'theme': 0}}):
+        lexicon_df = pd.read_csv(lexicon_path)
+
+        verb_score_dict = defaultdict(lambda: defaultdict(int))
+        for i, _row in lexicon_df.iterrows():
+            if not pd.isnull(_row[label_column]):
+                _lemma  = self.__get_lemma_spacy(_row[verb_column])
+                verb_score_dict[_lemma] = label_dict[_row[label_column]]
+        
+        self.verb_score_dict = verb_score_dict
+
+
+    def train(self, texts, text_ids):
         self.texts = texts
         self.text_ids = text_ids
         self.persona_score_dict, \
             self.id_persona_score_dict, \
             self.id_persona_count_dict, \
             self.id_nsubj_verb_count_dict, \
-            self.id_dobj_verb_count_dict = self.__score_dataset(self.verb_label_dict, self.texts, self.text_ids)
+            self.id_dobj_verb_count_dict = self.__score_dataset(self.texts, self.text_ids)
+
 
     def get_score_totals(self):
         return self.persona_score_dict
@@ -67,10 +85,10 @@ class ConnoFramer:
         return self.id_dobj_verb_count_dict[doc_id]
 
 
-    def __loadFile(self, input_file, text_column, id_column):
-        """@todo: make this read in multiple types of files"""
-        df = pd.read_csv(input_file)
-        return df[text_column].tolist(), df[id_column].tolist()
+    # def __loadFile(self, input_file, text_column, id_column):
+    #     """@todo: make this read in multiple types of files"""
+    #     df = pd.read_csv(input_file)
+    #     return df[text_column].tolist(), df[id_column].tolist()
 
 
     def __getCorefClusters(self, spacyDoc):
@@ -170,34 +188,34 @@ class ConnoFramer:
 
     def __score_document(self,
                          nsubj_verb_count_dict, 
-                         dobj_verb_count_dict, 
-                         verb_label_dict):
-        """
-        TODO: need to handle agency (and other lexicons too?)
-        """
+                         dobj_verb_count_dict):
 
         persona_score_dict = defaultdict(lambda: defaultdict(int))
 
         for (_persona, _verb), _count in nsubj_verb_count_dict.items():
-            if _verb in verb_label_dict:
-                _label = verb_label_dict[_verb]  
-                if _label == 'power_agent':
+            if _verb in self.verb_score_dict:
+                _score = self.verb_score_dict[_verb]['agent']
+                if self.verb_score_dict[_verb]['agent'] == 1:
                     persona_score_dict[_persona]['positive'] += _count
-                if _label == 'power_theme':
+                elif self.verb_score_dict[_verb]['agent'] == -1:
+                    persona_score_dict[_persona]['negative'] += _count
+                if self.verb_score_dict[_verb]['theme'] == 1:
                     persona_score_dict[_persona]['negative'] += _count
 
         for (_persona, _verb), _count in dobj_verb_count_dict.items():
-            if _verb in verb_label_dict:
-                _label = verb_label_dict[_verb]  
-                if _label == 'power_theme':
+            if _verb in self.verb_score_dict:
+                _score = self.verb_score_dict[_verb]['theme']
+                if _score == 1:
                     persona_score_dict[_persona]['positive'] += _count
-                if _label == 'power_agent':
+                elif _score == -1:
+                    persona_score_dict[_persona]['negative'] += _count
+                if self.verb_score_dict[_verb]['agent'] == 1:
                     persona_score_dict[_persona]['negative'] += _count
 
         return persona_score_dict
 
 
-    def __score_dataset(self, verb_label_dict, texts, text_ids):
+    def __score_dataset(self, texts, text_ids):
 
         id_nsubj_verb_count_dict = {}
         id_dobj_verb_count_dict = {}
@@ -215,7 +233,7 @@ class ConnoFramer:
             j += 1
             
             _nsubj_verb_count_dict, _dobj_verb_count_dict = self.__parseAndExtractFrames(_text)
-            _persona_score_dict = self.__score_document(_nsubj_verb_count_dict, _dobj_verb_count_dict, verb_label_dict)
+            _persona_score_dict = self.__score_document(_nsubj_verb_count_dict, _dobj_verb_count_dict)
             _persona_count_dict = self.__get_persona_counts_per_document(_nsubj_verb_count_dict, _dobj_verb_count_dict)
 
             id_persona_score_dict[_id] = _persona_score_dict
@@ -257,37 +275,3 @@ class ConnoFramer:
                 verb_count_dict[_verb] += 1
         
         return verb_count_dict
-
-
-    def __get_lemma_spacy(self, verb):
-        verb = verb.split()[0]
-        _lemmas = lemmatizer(verb, 'VERB')
-        return _lemmas[0]
-
-
-    def __get_verb_agency_dict(self, agency_path):
-
-        verb_agency_dict = {}
-
-        agency_df = pd.read_csv(agency_path)
-
-        for i, _row in agency_df.iterrows():
-            _verb = _row['verb']
-            _lemma = self.__get_lemma_spacy(_verb)
-            verb_agency_dict[_lemma] = _row['agency']
-
-        return verb_agency_dict
-
-
-    def __get_verb_power_dict(self, agency_path):
-
-        verb_power_dict = {}
-
-        agency_df = pd.read_csv(agency_path)
-
-        for i, _row in agency_df.iterrows():
-            _verb = _row['verb']
-            _lemma = self.__get_lemma_spacy(_verb)
-            verb_power_dict[_lemma] = _row['power']
-
-        return verb_power_dict
