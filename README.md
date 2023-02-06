@@ -13,7 +13,7 @@ Package to extract connotation frames
 (alternatively: Note, this requires [NeuralCoref](https://github.com/huggingface/neuralcoref), which I had to install by downloading the git repo)
 
 
-## 
+## Usage
 
 ### main2.py
 To run main2.py: see `demo.ipynb`
