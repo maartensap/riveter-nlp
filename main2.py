@@ -25,6 +25,7 @@ class ConnoFramer:
         self.id_persona_count_dict = {}
         self.id_nsubj_verb_count_dict = {}
         self.id_dobj_verb_count_dict = {}
+        self.nsubj_only_flag = False
 
 
     def __get_lemma_spacy(self, verb):
@@ -46,6 +47,13 @@ class ConnoFramer:
             if not pd.isnull(_row[label_column]):
                 _lemma  = self.__get_lemma_spacy(_row[verb_column])
                 verb_score_dict[_lemma] = label_dict[_row[label_column]]
+
+        # Check self.verb_score_dict to see if no dobj scores (e.g., agency lexicon)
+        dobj_count = 0
+        for _verb, _person_score_dict in verb_score_dict.items():
+            dobj_count += _person_score_dict['theme']
+        if dobj_count == 0:
+            self.nsubj_only_flag = True
         
         self.verb_score_dict = verb_score_dict
 
@@ -209,7 +217,7 @@ class ConnoFramer:
                     persona_score_dict[_persona]['positive'] += _count
                 elif _score == -1:
                     persona_score_dict[_persona]['negative'] += _count
-                if self.verb_score_dict[_verb]['agent'] == 1:
+                if (not self.nsubj_only_flag) and self.verb_score_dict[_verb]['agent'] == 1:
                     persona_score_dict[_persona]['negative'] += _count
 
         return persona_score_dict
