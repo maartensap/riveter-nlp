@@ -25,7 +25,7 @@ To run main2.py: see `demo.ipynb`
 ```
 framer = ConnoFramer()  
 framer.load_lexicon(lexicon_path, 'verb', 'power')
-framer.train(example_stories,
+framer.train(texts,
              text_ids)
 persona_score_dict = framer.get_score_totals()  
 ```
