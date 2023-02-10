@@ -53,3 +53,5 @@ Command to run main.py: `python3 main.py --input_file fakeStories.csv`
    - 🔲 add in weighted lexicon (not sure what the goal would here, but a possible extension, esp. if someone ends up using a model to create a lexicon?)
    - 🔲 allow non-coref option using persona lexicon (e.g., if I just wanted scores for all pronouns)
 
+
+
