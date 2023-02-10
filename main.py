@@ -110,6 +110,8 @@ def findVerbPhrases(spacyDoc):
   return verbs
 
 def parseAndExtractFrames(text,peopleWords=["doctor"]):
+  print("text")
+  print(text)
   doc = nlp(text)
 
   # coref clusters
@@ -127,7 +129,8 @@ def parseAndExtractFrames(text,peopleWords=["doctor"]):
   mention2verbs = {}
   
   verbTags = ["VERB","AUX"]
-
+  print("clusters")
+  print(clusters)
   # maarten's attempt but I forgot to keep track of which direction the mention attaches to the verb
   # so I'm giving up for tonight
   # for c in clusters:
