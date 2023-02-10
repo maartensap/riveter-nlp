@@ -40,7 +40,7 @@ Command to run main.py: `python3 main.py --input_file fakeStories.csv`
 ## To Do 🗒️
 
 - Before ACL demo deadline:
-   - 🔲 adding agency
+   - ✅ adding agency
    - 🔲 adding other connotation frames (possibly)
    - 🔲 add methods to get e.g. all the docs in which a persona was referenced, all the docs in which a verb was used
    - 🔲 return the list of matched verbs (also easier if driven by test cases)?
