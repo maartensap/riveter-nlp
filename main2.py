@@ -3,12 +3,12 @@ from datetime import datetime
 
 import pandas as pd
 
+from tqdm import tqdm
+
 import spacy
 nlp = spacy.load('en_core_web_sm')
 
-from spacy.lemmatizer import Lemmatizer
-from spacy.lang.en import LEMMA_INDEX, LEMMA_EXC, LEMMA_RULES
-lemmatizer = Lemmatizer(LEMMA_INDEX, LEMMA_EXC, LEMMA_RULES)
+lemmatizer = spacy.load('en_core_web_sm', disable=['tok2vec', 'tagger', 'parser', 'senter', 'attribute_ruler', 'ner'])
 
 import neuralcoref
 nlp.add_pipe(neuralcoref.NeuralCoref(nlp.vocab,blacklist=False),name="neuralcoref")
@@ -31,7 +31,7 @@ class ConnoFramer:
     def __get_lemma_spacy(self, verb):
         verb = verb.split()[0]
         _lemmas = lemmatizer(verb, 'VERB')
-        return _lemmas[0]
+        return _lemmas[0].lemma_
 
 
     def load_lexicon(self, lexicon_path, verb_column, label_column, label_dict={'power_agent': {'agent': 1, 'theme': 0}, 
@@ -230,16 +230,7 @@ class ConnoFramer:
         id_persona_score_dict = {}
         id_persona_count_dict = {}
 
-        j = 0
-        percent_size = int(len(texts) / 100)
-
-        for _text, _id in zip(texts, text_ids):
-
-            # TODO: replace with a visual loading bar
-            if percent_size != 0 and j % percent_size == 0:
-                print(str(datetime.now())[:-7] + ' Processed ' + str(j) + ' out of ' + str(len(texts)))
-            j += 1
-            
+        for _text, _id in tqdm(zip(texts, text_ids), total=len(texts)):
             _nsubj_verb_count_dict, _dobj_verb_count_dict = self.__parseAndExtractFrames(_text)
             _persona_score_dict = self.__score_document(_nsubj_verb_count_dict, _dobj_verb_count_dict)
             _persona_count_dict = self.__get_persona_counts_per_document(_nsubj_verb_count_dict, _dobj_verb_count_dict)
