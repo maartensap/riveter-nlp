@@ -65,34 +65,41 @@ def test_getPeopleClusters():
     assert people[0].main.text == "Brian Smith"
     assert people[1].main.text == "I"
 
-# test_getPeopleClusters()
-# def test_parseAndExtractFrames():
-#     # 
-    
-#     create_test_lex()
-#     framer = ConnoFramer()
-#     framer.load_lexicon("test_lex.csv", 'verb', 'agency')
-#     destroy_test_lex()
+def test_parseAndExtractFrames():
+    framer = ConnoFramer()
 
+    text = "I accompanied Brian Smith to the store, because he had abandoned his bike there. Brian also absorbs lots of complaints, so I address him as doctor. I also have a friend named Brian Jones. Brian Jones abuses free food."
+    nsubj_verb_count_dict, dobj_verb_count_dict = framer._ConnoFramer__parseAndExtractFrames(text)
+    assert len(nsubj_verb_count_dict) == 6
+    assert len(dobj_verb_count_dict) == 2
+    assert ("brian smith", "abandon") in nsubj_verb_count_dict
+    assert ("i", "accompany") in nsubj_verb_count_dict
+    assert ("brian smith", "accompany") in dobj_verb_count_dict
+    assert ("brian smith", "address") in dobj_verb_count_dict
 
-#     # t = framer._ConnoFramer__parseAndExtractFrames(text)
-#     # print(t)
+    # This is a failure case, it does not recognize that "my friend" is apposition to "Brian Jones"
+    # assert ("have", "brian jones") in dobj_verb_count_dict
 
-#     text = "I accompanied my friend Brian Smith to the store, because he had abandoned his bike there. Brian also absorbs lots of complaints, so I address him as doctor. My other friend is named Brian Jones"
-#     t = framer._ConnoFramer__parseAndExtractFrames(text)
-#     print(t)
-#     # self.__parseAndExtractFrames(_text)
-#             # _nsubj_verb_count_dict, _dobj_verb_count_dict = self.__parseAndExtractFrames(_text)
-#             # _persona_score_dict = self.__score_document(_nsubj_verb_count_dict, _dobj_verb_count_dict)
-#             # _persona_count_dict = self.__get_persona_counts_per_document(_nsubj_verb_count_dict, _dobj_verb_count_dict)
+def test_score_document():
+    # TODO
+    pass
 
-# # example_stories = ["I was just thinking about walking down the street, when my shoelace snapped. I had to call my doctor to pick me up. I felt so bad I also called my friend Katie, who came in her car. She was a lifesaver. My friend Jack is nice.",
-# #                    "My doctor fixed my shoe. I thanked him. Then Susan arrived. Now she is calling the doctor too."]
-# # text_ids = [0, 1]
+def test_score_document():
+    # TODO
+    pass
 
-# # framer.train(example_stories, text_ids)
+def test_get_persona_counts_per_document():
+    # TODO
+    pass
 
-# # for x,v in framer.get_score_totals().items():
-# #     print(x, v)
+def test_train():
+    # TODO
+    pass
 
-# test_parseAndExtractFrames()
+def test_get_persona_counts_per_document():
+    # TODO
+    pass
+
+def test_evaluate_verb_coverage():
+    # TODO
+    pass

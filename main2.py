@@ -141,7 +141,7 @@ class ConnoFramer:
                 # also add singletons
                 if not inClusterAlready:
                     #print(span)
-                    peopleClusters.add(neuralcoref.neuralcoref.Cluster(len(clusters),span.text,[span]))
+                    peopleClusters.add(neuralcoref.neuralcoref.Cluster(len(clusters),span,[span]))
 
         # Re-iterating over noun chunks, that's the entities that are going to have verbs,
         # and removing the coref mentions that are not a noun chunk
