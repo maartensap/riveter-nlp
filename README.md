@@ -19,7 +19,8 @@ Requirements
 
 We recommend creating a new virtual environment. 
 ```
-conda create -n py38 python=3.8
+conda create -n connoFramerEnv python=3.8
+conda activate connoFramerEnv
 ```
 
 Download this repo.
