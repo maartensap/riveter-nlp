@@ -8,25 +8,34 @@ Package to extract connotation frames
 
 ## Installation
 
-- requirements Python 3.8, numpy, pandas, spaCy 2.3.9, neuralcoref
+Requirements 
+- Python 3.8
+- numpy
+- pandas
+- spaCy 2.3.9
+- neuralcoref
 
-Best to create a new virtual environment. Then download this repo
-
+We recommend creating a new virtual environment. 
 ```
 conda create -n py38 python=3.8
+```
+
+Download this repo:
+
+```
 git clone git@github.com:maartensap/connotationFramer.git
 cd connotationFramer
 ```
 
-Install `neuralcoref` from source. This will also install spaCy 2.3.9
+Install `neuralcoref` from source. This will also install spaCy 2.3.9.
 ```
 git clone https://github.com/huggingface/neuralcoref.git
 cd neuralcoref
 pip install -r requirements.txt
 pip install -e .
 ```
-Install pandas and download spaCy files
 
+Install pandas and download spaCy files.
 ```
 conda install pandas
 python -m spacy download en_core_web_sm
