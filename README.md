@@ -15,12 +15,14 @@ Requirements
 - spaCy 2.3.9
 - neuralcoref
 
+### Example installation instructions
+
 We recommend creating a new virtual environment. 
 ```
 conda create -n py38 python=3.8
 ```
 
-Download this repo:
+Download this repo.
 
 ```
 git clone git@github.com:maartensap/connotationFramer.git
