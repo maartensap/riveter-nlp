@@ -15,6 +15,11 @@ nlp.add_pipe(neuralcoref.NeuralCoref(nlp.vocab,blacklist=False),name="neuralcore
 
 ner_tags = ["PERSON"]
 
+# This is messy, but I think special-casing pronouns is probably the right thing to do
+pronoun_special_cases = {
+    "me":"i",
+    "us":"we"
+}
 
 class ConnoFramer:
 
@@ -25,6 +30,7 @@ class ConnoFramer:
         self.id_persona_count_dict = {}
         self.id_nsubj_verb_count_dict = {}
         self.id_dobj_verb_count_dict = {}
+        self.id_persona_scored_verb_dict = {}
         self.nsubj_only_flag = False
 
 
@@ -65,7 +71,8 @@ class ConnoFramer:
             self.id_persona_score_dict, \
             self.id_persona_count_dict, \
             self.id_nsubj_verb_count_dict, \
-            self.id_dobj_verb_count_dict = self.__score_dataset(self.texts, self.text_ids)
+            self.id_dobj_verb_count_dict, \
+        self.id_persona_scored_verb_dict = self.__score_dataset(self.texts, self.text_ids)
 
 
     def get_score_totals(self):
@@ -83,6 +90,9 @@ class ConnoFramer:
 
     def count_personas_for_doc(self, doc_id):
         return self.id_persona_count_dict[doc_id]
+    
+    def count_scored_verbs_for_doc(self, doc_id):
+        return self.id_persona_scored_verb_dict[doc_id]
 
 
     def count_nsubj_for_doc(self, doc_id):
@@ -104,7 +114,7 @@ class ConnoFramer:
         return clusters
 
 
-    def __getPeopleClusters(self, spacyDoc, peopleWords=["doctor"]):
+    def __getPeopleClusters(self, spacyDoc, peopleWords):
 
         clusters = self.__getCorefClusters(spacyDoc)
 
@@ -114,26 +124,24 @@ class ConnoFramer:
         peopleClusters = set()
         # adding I / you clusters to people
         main2cluster = {c.main.text: c for c in clusters}
-        
+
         if "I" in main2cluster:
             peopleClusters.add(main2cluster["I"])
         if "you" in main2cluster:
             peopleClusters.add(main2cluster["you"])
 
-        # for ent in spacyDoc.ents: # ent is a type span
+        # This checks if each coref cluster contains a "person", and only keeps clusters that contain at least 1 person
+        # it also adds singletons
         for span in spacyDoc.noun_chunks:
             isPerson = len(span.ents) > 0 and any([e.label_ in ner_tags for e in span.ents])
-            isPerson = isPerson or any([w.text==p for w in span for p in peopleWords])
+            isPerson = isPerson or any([w.text.lower()==p.lower() for w in span for p in peopleWords])
             
             if isPerson:
 
-                # if ent.label_ in ner_tags:
-                # print(ent.text, ent.start_char, ent.end_char, ent.label_)
-                
                 # check if it's in the clusters to add people
                 inClusterAlready = False
                 for c in clusters:
-                    if any([spacyDoc[m.start]==spacyDoc[span.start] and spacyDoc[m.end] == spacyDoc[span.end] for m in c.mentions]):
+                    if any([m.start == span.start and m.end == span.end for m in c.mentions]):
                         #print("Yes", c)      
                         peopleClusters.add(c)
                         inClusterAlready = True
@@ -145,26 +153,20 @@ class ConnoFramer:
 
         # Re-iterating over noun chunks, that's the entities that are going to have verbs,
         # and removing the coref mentions that are not a noun chunk
+        # Note that we keep coref mentions that noun chunks but not people (as long as something else in the chain is a person)
         newClusters = {c.main:[] for c in peopleClusters}
         for span in spacyDoc.noun_chunks:
-            ss, se = span.start, span.end
             for c in peopleClusters:
                 for m in c.mentions:
-                    ms, me = m.start, m.end
                     if m.start==span.start and m.end == span.end and span.text == m.text:
-                        # this is the same mention, we keep it
-                        # print("Keeping this one",span,ss,m,ms)
                         newClusters[c.main].append(span)
-                        keepIt = True
-                        # elif m.text in span.text and ss <= ms and me <= se: # print("in the middle? diregard")
-                        #  pass
 
         newPeopleClusters = [neuralcoref.neuralcoref.Cluster(i,main,mentions)
                             for i,(main, mentions) in enumerate(newClusters.items())]
         return newPeopleClusters
     
 
-    def __parseAndExtractFrames(self, text, peopleWords=["doctor"]):
+    def __parseAndExtractFrames(self, text, peopleWords=["doctor", "i", "me", "you", "he", "she", "man", "woman"]):
 
         nsubj_verb_count_dict = defaultdict(int)
         dobj_verb_count_dict = defaultdict(int)
@@ -183,11 +185,13 @@ class ConnoFramer:
             
                 if _span.root.dep_ == 'nsubj':
                     _nusbj = str(_cluster.main).lower()
+                    _nusbj = pronoun_special_cases.get(_nusbj, _nusbj)
                     _verb = _span.root.head.lemma_.lower()
                     nsubj_verb_count_dict[(_nusbj, _verb)] += 1   
 
                 elif _span.root.dep_ == 'dobj':
                     _dobj = str(_cluster.main).lower()
+                    _dobj = pronoun_special_cases.get(_dobj, _dobj)
                     _verb = _span.root.head.lemma_.lower() 
                     dobj_verb_count_dict[(_dobj, _verb)] += 1   
 
@@ -199,9 +203,11 @@ class ConnoFramer:
                          dobj_verb_count_dict):
 
         persona_score_dict = defaultdict(lambda: defaultdict(int))
+        persona_scored_verbs_dict = defaultdict(int)
 
         for (_persona, _verb), _count in nsubj_verb_count_dict.items():
             if _verb in self.verb_score_dict:
+                persona_scored_verbs_dict[_persona] += 1
                 _score = self.verb_score_dict[_verb]['agent']
                 if self.verb_score_dict[_verb]['agent'] == 1:
                     persona_score_dict[_persona]['positive'] += _count
@@ -212,6 +218,7 @@ class ConnoFramer:
 
         for (_persona, _verb), _count in dobj_verb_count_dict.items():
             if _verb in self.verb_score_dict:
+                persona_scored_verbs_dict[_persona] += 1
                 _score = self.verb_score_dict[_verb]['theme']
                 if _score == 1:
                     persona_score_dict[_persona]['positive'] += _count
@@ -220,7 +227,7 @@ class ConnoFramer:
                 if (not self.nsubj_only_flag) and self.verb_score_dict[_verb]['agent'] == 1:
                     persona_score_dict[_persona]['negative'] += _count
 
-        return persona_score_dict
+        return persona_score_dict, persona_scored_verbs_dict
 
 
     def __score_dataset(self, texts, text_ids):
@@ -229,16 +236,18 @@ class ConnoFramer:
         id_dobj_verb_count_dict = {}
         id_persona_score_dict = {}
         id_persona_count_dict = {}
+        id_persona_scored_verb_dict = {}
 
         for _text, _id in tqdm(zip(texts, text_ids), total=len(texts)):
             _nsubj_verb_count_dict, _dobj_verb_count_dict = self.__parseAndExtractFrames(_text)
-            _persona_score_dict = self.__score_document(_nsubj_verb_count_dict, _dobj_verb_count_dict)
+            _persona_score_dict, _persona_scored_verb_dict = self.__score_document(_nsubj_verb_count_dict, _dobj_verb_count_dict)
             _persona_count_dict = self.__get_persona_counts_per_document(_nsubj_verb_count_dict, _dobj_verb_count_dict)
 
             id_persona_score_dict[_id] = _persona_score_dict
             id_persona_count_dict[_id] = _persona_count_dict
             id_nsubj_verb_count_dict[_id] = _nsubj_verb_count_dict
             id_dobj_verb_count_dict[_id] = _dobj_verb_count_dict
+            id_persona_scored_verb_dict[_id] = _persona_scored_verb_dict
 
         persona_score_dict = defaultdict(lambda: defaultdict(int))
         for _id, _persona_score_dict in id_persona_score_dict.items():
@@ -247,8 +256,7 @@ class ConnoFramer:
                 persona_score_dict[_persona]['negative'] += _power_score_dict['negative']
 
         print(str(datetime.now())[:-7] + ' Complete!')
-
-        return persona_score_dict, id_persona_score_dict, id_persona_count_dict, id_nsubj_verb_count_dict, id_dobj_verb_count_dict
+        return persona_score_dict, id_persona_score_dict, id_persona_count_dict, id_nsubj_verb_count_dict, id_dobj_verb_count_dict, id_persona_scored_verb_dict
 
 
     def __get_persona_counts_per_document(self,
