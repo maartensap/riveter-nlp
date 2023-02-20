@@ -27,7 +27,7 @@ conda activate connoFramerEnv
 Download this repo.
 
 ```
-git clone git@github.com:maartensap/connotationFramer.git
+git clone https://github.com/maartensap/connotationFramer.git
 cd connotationFramer
 ```
 
