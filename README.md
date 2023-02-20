@@ -17,7 +17,7 @@ Requirements
 
 ### Example installation instructions
 
-We recommend creating a new virtual environment. 
+We recommend creating a new virtual environment. Activate this environment before installing and before running the code.
 
 ```
 conda create -n connoFramerEnv python=3.8
