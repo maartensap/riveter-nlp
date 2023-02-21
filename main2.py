@@ -93,11 +93,11 @@ class ConnoFramer:
 
 
     def get_score_totals(self):
-        return self.persona_score_dict
+        return dict(self.persona_score_dict)
 
 
     def get_scores_for_doc(self, doc_id):
-        return self.id_persona_score_dict[doc_id]
+        return dict(self.id_persona_score_dict[doc_id])
 
 
     # TODO: this would be helpful for debugging and result inspection
@@ -105,18 +105,18 @@ class ConnoFramer:
 
 
     def count_personas_for_doc(self, doc_id):
-        return self.id_persona_count_dict[doc_id]
+        return dict(self.id_persona_count_dict[doc_id])
     
     def count_scored_verbs_for_doc(self, doc_id):
-        return self.id_persona_scored_verb_dict[doc_id]
+        return dict(self.id_persona_scored_verb_dict[doc_id])
 
 
     def count_nsubj_for_doc(self, doc_id):
-        return self.id_nsubj_verb_count_dict[doc_id]
+        return dict(self.id_nsubj_verb_count_dict[doc_id])
 
 
     def count_dobj_for_doc(self, doc_id):
-        return self.id_dobj_verb_count_dict[doc_id]
+        return dict(self.id_dobj_verb_count_dict[doc_id])
 
 
     # def __loadFile(self, input_file, text_column, id_column):
