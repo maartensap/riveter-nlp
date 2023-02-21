@@ -31,7 +31,6 @@ class ConnoFramer:
         self.id_nsubj_verb_count_dict = {}
         self.id_dobj_verb_count_dict = {}
         self.id_persona_scored_verb_dict = {}
-        self.nsubj_only_flag = False
 
 
     def __get_lemma_spacy(self, verb):
@@ -40,26 +39,44 @@ class ConnoFramer:
         return _lemmas[0].lemma_
 
 
-    def load_lexicon(self, lexicon_path, verb_column, label_column, label_dict={'power_agent': {'agent': 1, 'theme': 0}, 
-                                                                                'power_theme': {'agent': 0, 'theme': 1},
-                                                                                'power_equal': {'agent': 0, 'theme': 0},
-                                                                                'agency_pos': {'agent': 1, 'theme': 0},
-                                                                                'agency_neg': {'agent': -1, 'theme': 0},
-                                                                                'agency_equal': {'agent': 0, 'theme': 0}}):
-        lexicon_df = pd.read_csv(lexicon_path)
+    def load_rashkin_lexicon(self, label='effect'):
+        """
+        label can be any of [effect, state, value, perspective]
+        """
+
+        lexicon_df = pd.read_csv('data/rashkin-lexicon/full_frame_info.txt', sep='\t')
+
+        verb_score_dict = defaultdict(lambda: defaultdict(int))
+        for i, _row in lexicon_df.iterrows():
+
+            _lemma  = _row['verb'].strip()
+
+            _score_dict = {'agent': 0, 'theme': 0}
+
+            _score_dict['agent'] += _row[label + '(s)'] # TODO: Should the Rashkin scores be converted to [-1, 0, 1]?
+            _score_dict['theme'] += _row[label + '(o)']
+
+            verb_score_dict[_lemma] = _score_dict
+
+        self.verb_score_dict = verb_score_dict
+
+
+    def load_sap_lexicon(self, label_column):
+
+        label_dict = {'power_agent':  {'agent': 1, 'theme': -1}, 
+                      'power_theme':  {'agent': -1, 'theme': 1},
+                      'power_equal':  {'agent': 0, 'theme': 0},
+                      'agency_pos':   {'agent': 1, 'theme': 0},
+                      'agency_neg':   {'agent': -1, 'theme': 0},
+                      'agency_equal': {'agent': 0, 'theme': 0}}
+
+        lexicon_df = pd.read_csv('data/sap-lexicon/agency_power.csv')
 
         verb_score_dict = defaultdict(lambda: defaultdict(int))
         for i, _row in lexicon_df.iterrows():
             if not pd.isnull(_row[label_column]):
-                _lemma  = self.__get_lemma_spacy(_row[verb_column])
+                _lemma  = self.__get_lemma_spacy(_row['verb'])
                 verb_score_dict[_lemma] = label_dict[_row[label_column]]
-
-        # Check self.verb_score_dict to see if no dobj scores (e.g., agency lexicon)
-        dobj_count = 0
-        for _verb, _person_score_dict in verb_score_dict.items():
-            dobj_count += _person_score_dict['theme']
-        if dobj_count == 0:
-            self.nsubj_only_flag = True
         
         self.verb_score_dict = verb_score_dict
 
@@ -85,7 +102,6 @@ class ConnoFramer:
 
     # TODO: this would be helpful for debugging and result inspection
     # def get_docs_for_persona(self, persona):
-
 
 
     def count_personas_for_doc(self, doc_id):
@@ -202,30 +218,20 @@ class ConnoFramer:
                          nsubj_verb_count_dict, 
                          dobj_verb_count_dict):
 
-        persona_score_dict = defaultdict(lambda: defaultdict(int))
+        persona_score_dict = defaultdict(float)
         persona_scored_verbs_dict = defaultdict(int)
 
         for (_persona, _verb), _count in nsubj_verb_count_dict.items():
             if _verb in self.verb_score_dict:
                 persona_scored_verbs_dict[_persona] += 1
-                _score = self.verb_score_dict[_verb]['agent']
-                if self.verb_score_dict[_verb]['agent'] == 1:
-                    persona_score_dict[_persona]['positive'] += _count
-                elif self.verb_score_dict[_verb]['agent'] == -1:
-                    persona_score_dict[_persona]['negative'] += _count
-                if self.verb_score_dict[_verb]['theme'] == 1:
-                    persona_score_dict[_persona]['negative'] += _count
+                _agent_score = self.verb_score_dict[_verb]['agent']
+                persona_score_dict[_persona] += (_count*_agent_score)
 
         for (_persona, _verb), _count in dobj_verb_count_dict.items():
             if _verb in self.verb_score_dict:
                 persona_scored_verbs_dict[_persona] += 1
-                _score = self.verb_score_dict[_verb]['theme']
-                if _score == 1:
-                    persona_score_dict[_persona]['positive'] += _count
-                elif _score == -1:
-                    persona_score_dict[_persona]['negative'] += _count
-                if (not self.nsubj_only_flag) and self.verb_score_dict[_verb]['agent'] == 1:
-                    persona_score_dict[_persona]['negative'] += _count
+                _theme_score = self.verb_score_dict[_verb]['theme']
+                persona_score_dict[_persona] += (_count*_theme_score)
 
         return persona_score_dict, persona_scored_verbs_dict
 
@@ -249,11 +255,10 @@ class ConnoFramer:
             id_dobj_verb_count_dict[_id] = _dobj_verb_count_dict
             id_persona_scored_verb_dict[_id] = _persona_scored_verb_dict
 
-        persona_score_dict = defaultdict(lambda: defaultdict(int))
+        persona_score_dict = defaultdict(float)
         for _id, _persona_score_dict in id_persona_score_dict.items():
-            for _persona, _power_score_dict in _persona_score_dict.items():
-                persona_score_dict[_persona]['positive'] += _power_score_dict['positive']
-                persona_score_dict[_persona]['negative'] += _power_score_dict['negative']
+            for _persona, _score in _persona_score_dict.items():
+                persona_score_dict[_persona] += _score
 
         print(str(datetime.now())[:-7] + ' Complete!')
         return persona_score_dict, id_persona_score_dict, id_persona_count_dict, id_nsubj_verb_count_dict, id_dobj_verb_count_dict, id_persona_scored_verb_dict

@@ -1,4 +1,4 @@
-verb	Perspective(wo)	Perspective(ws)	Perspective(so)	Effect(o)	Effect(s)	Value(o)	Value(s)	State(o)	State(s)	Perspective(ro)	Perspective(rs)	Perspective(os)
+verb	perspective(wo)	perspective(ws)	perspective(so)	effect(o)	effect(s)	value(o)	value(s)	state(o)	state(s)	perspective(ro)	perspective(rs)	perspective(os)
 have	0.366666666667	0.333333333333	0.466666666667	0.0666666666667	0.2	0.466666666667	0.6	0.0666666666667	0.366666666667	0.4	0.366666666667	0.0666666666667
 say	0.0	0.166666666667	0.0666666666667	0.133333333333	0.0666666666667	0.0666666666667	1.0	0.0	0.1	0.0333333333333	0.266666666667	0.0
 make	-0.0666666666667	0.1	0.1	0.466666666667	-0.0666666666667	0.2	1.0	0.0	0.166666666667	-0.0333333333333	0.2	0.0
