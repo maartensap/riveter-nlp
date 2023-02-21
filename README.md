@@ -86,7 +86,8 @@ Replace `fakeStories.csv` with any .csv input file, formatted as follows:
 
 - Before ACL demo deadline:
    - ✅ adding agency
-   - 🔲 adding other connotation frames (possibly)
+   - ✅ adding other connotation frames (possibly)
+   - 🔲 add new method for loading custom lexicons
    - 🔲 add methods to get e.g. all the docs in which a persona was referenced, all the docs in which a verb was used
    - 🔲 return the list of matched verbs (also easier if driven by test cases)?
    - 🔲 add in more people lists other than doctor (that's going to be easier if driven by test cases)
