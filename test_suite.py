@@ -206,4 +206,26 @@ def test_find_people():
     assert len(subj_verb_count_dict) == 2
 
 
-test_score_document()
+# This uses the same example as the demo. Use it to make sure demo isn't broken
+def test_demo():
+    example_stories = ["I was just thinking about walking down the street, when my shoelace snapped. I had to call my doctor to pick me up. I felt so bad I also called my friend Katie, who came in her car. She was a lifesaver. My friend Jack is nice.",
+                   "My doctor fixed my shoe. I thanked him. Then Susan arrived. Now she is calling the doctor too."]
+    text_ids = [0, 1]
+    framer = ConnoFramer()
+    framer.load_sap_lexicon('power')
+    framer.train(example_stories, text_ids)
+
+    # In the second document, "I" should get mapped to "i" instead of "my"
+    assert ('i', 'thank') in framer.id_nsubj_verb_count_dict[1]
+    assert ('my', 'thank') not in framer.id_nsubj_verb_count_dict[1]
+
+    # I think (0), I have (+1), I feel (0), I call (-1), pick me (-1), but "have" doesn't lemmatize
+    assert framer.id_persona_score_dict[0]["i"] == -2
+    assert framer.id_persona_scored_verb_dict[0]["i"] == 4
+
+    # I thank (-1)
+    assert framer.id_persona_score_dict[1]["i"] == -1
+    # print(framer.id_persona_scored_verb_dict[0]["i"])
+    # print(framer.id_persona_scored_verb_dict[1]["i"])
+    score_totals = framer.get_score_totals()
+    assert score_totals["i"] == -3

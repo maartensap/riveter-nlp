@@ -16,10 +16,15 @@ nlp.add_pipe(neuralcoref.NeuralCoref(nlp.vocab,blacklist=False),name="neuralcore
 ner_tags = ["PERSON"]
 
 # This is messy, but I think special-casing pronouns is probably the right thing to do
-pronoun_special_cases = {
-    "me":"i",
-    "us":"we"
+pronoun_map = {
+    "i": ["me", "my", "mine"],
+    "we": ["us", "ours", "our"],
+    "you": ["yours"]
 }
+pronoun_special_cases = {}
+for p, forms in pronoun_map.items():
+    for f in forms:
+        pronoun_special_cases[f] = p
 
 class ConnoFramer:
 
