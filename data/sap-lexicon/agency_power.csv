@@ -67,7 +67,7 @@ answer,agency_equal,power_theme
 anticipate,agency_pos,power_equal
 apologize,agency_pos,power_theme
 apologize to,agency_pos,power_theme
-appal,agency_equal,power_agent
+appall,agency_equal,power_agent
 appeal,agency_neg,power_theme
 appeal to,agency_pos,power_theme
 appear,agency_pos,
@@ -149,7 +149,7 @@ begin,agency_pos,power_equal
 beg,agency_pos,power_theme
 behave,agency_equal,
 behold,agency_equal,power_theme
-belche,agency_pos,
+belch,agency_pos,
 believe,agency_neg,power_theme
 bellow,agency_pos,power_agent
 belong to,agency_neg,power_theme
@@ -172,7 +172,7 @@ blanche,agency_pos,
 blare,agency_equal,power_equal
 blast,agency_pos,power_agent
 blaze,agency_equal,
-bleache,agency_pos,power_agent
+bleach,agency_pos,power_agent
 bleed,agency_neg,
 blend,agency_pos,power_agent
 bless,agency_pos,power_equal
@@ -552,7 +552,7 @@ disclose,agency_pos,power_equal
 disconnect,agency_pos,power_agent
 discourage,agency_pos,power_agent
 discover,agency_pos,power_agent
-discusse,agency_pos,power_equal
+discuss,agency_pos,power_equal
 disengage,agency_pos,power_agent
 disguise,agency_pos,power_agent
 disgust,agency_neg,power_equal
@@ -1123,7 +1123,7 @@ mangle,agency_pos,power_agent
 manipulate,agency_pos,power_agent
 man,agency_pos,power_agent
 manufacture,agency_pos,power_agent
-marche,agency_equal,
+march,agency_equal,
 mark,agency_pos,power_agent
 marry,agency_pos,power_equal
 marvel at,agency_equal,power_theme
@@ -1320,7 +1320,7 @@ pops,agency_pos,power_agent
 portray,agency_pos,power_theme
 pose,agency_neg,
 position,agency_pos,power_agent
-possesse,agency_equal,power_agent
+possess,agency_equal,power_agent
 postpone,agency_pos,power_agent
 post,agency_pos,power_agent
 pounce,agency_pos,
@@ -1331,7 +1331,7 @@ practice,agency_pos,power_theme
 praise,agency_pos,power_equal
 pray,agency_equal,power_theme
 pray to,agency_neg,power_theme
-preache,agency_pos,power_equal
+preach,agency_pos,power_equal
 precede,agency_neg,power_agent
 predict,agency_equal,power_theme
 prefer,agency_neg,power_theme
@@ -1606,7 +1606,7 @@ scrutinize,agency_pos,power_agent
 scurry,agency_pos,
 scuttle,agency_pos,
 seal,agency_pos,power_agent
-searche,agency_pos,power_agent
+search,agency_pos,power_agent
 sear,agency_pos,power_agent
 seat,agency_pos,power_theme
 secure,agency_pos,power_agent
@@ -2024,7 +2024,7 @@ unbuckle,agency_pos,power_agent
 unbutton,agency_pos,power_agent
 uncover,agency_pos,power_agent
 underestimate,agency_equal,power_theme
-undergos,agency_neg,power_theme
+undergo,agency_neg,power_theme
 underlie,agency_neg,power_agent
 undermine,agency_pos,power_agent
 underscore,agency_pos,power_agent
