@@ -8,8 +8,6 @@ from tqdm import tqdm
 import spacy
 nlp = spacy.load('en_core_web_sm')
 
-lemmatizer = spacy.load('en_core_web_sm', disable=['tok2vec', 'tagger', 'parser', 'senter', 'attribute_ruler', 'ner'])
-
 import neuralcoref
 nlp.add_pipe(neuralcoref.NeuralCoref(nlp.vocab,blacklist=False),name="neuralcoref")
 
@@ -26,6 +24,7 @@ for p, forms in pronoun_map.items():
     for f in forms:
         pronoun_special_cases[f] = p
 
+
 class ConnoFramer:
 
     def __init__(self):
@@ -38,16 +37,12 @@ class ConnoFramer:
         self.id_persona_scored_verb_dict = {}
 
 
-    def __get_lemma_spacy(self, verb):
-        verb = verb.split()[0]
-        _lemmas = lemmatizer(verb, 'VERB')
-        return _lemmas[0].lemma_
-
     def load_lexicon(self, label):
         if label in ['power', 'agency']:
             self.load_sap_lexicon(label)
         else:
             self.load_rashkin_lexicon(label)
+
 
     def load_rashkin_lexicon(self, label='effect'):
         """
@@ -85,7 +80,7 @@ class ConnoFramer:
         verb_score_dict = defaultdict(lambda: defaultdict(int))
         for i, _row in lexicon_df.iterrows():
             if not pd.isnull(_row[label_column]):
-                _lemma  = self.__get_lemma_spacy(_row['verb'])
+                _lemma  = _row['verb'].strip()
                 verb_score_dict[_lemma] = label_dict[_row[label_column]]
         
         self.verb_score_dict = verb_score_dict
