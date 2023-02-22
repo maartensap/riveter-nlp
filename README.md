@@ -52,8 +52,9 @@ python -m spacy download en_core_web_sm
 
 ## Usage
 
-### main2.py
-To run main2.py: see `demo.ipynb`
+### conno_framer.py
+
+To run `conno_framer.py`, see the examples in `demo.ipynb` (both located in the `conno_framer` directory).
 
 ```
 framer = ConnoFramer()  
@@ -64,7 +65,6 @@ persona_score_dict = framer.get_score_totals()
 ```
 
 *Note: [Here](https://towardsdatascience.com/get-your-conda-environment-to-show-in-jupyter-notebooks-the-easy-way-17010b76e874) are some instructions for how to run `demo.ipynb` from the connoFramerEnv.*
-
 
 ### main.py (DEPRECATED)
 To extract connotation frames from the command line, run main.py.
