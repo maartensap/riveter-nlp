@@ -58,7 +58,7 @@ To run `conno_framer.py`, see the examples in `demo.ipynb` (both located in the 
 
 ```
 framer = ConnoFramer()  
-framer.load_lexicon(lexicon_path, 'verb', 'power')
+framer.load_sap_lexicon('power')
 framer.train(texts,
              text_ids)
 persona_score_dict = framer.get_score_totals()  
