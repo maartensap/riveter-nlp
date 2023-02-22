@@ -38,6 +38,11 @@ class ConnoFramer:
         _lemmas = lemmatizer(verb, 'VERB')
         return _lemmas[0].lemma_
 
+    def load_lexicon(self, label):
+        if label in ['power', 'agency']:
+            self.load_sap_lexicon(label)
+        else:
+            self.load_rashkin_lexicon(label)
 
     def load_rashkin_lexicon(self, label='effect'):
         """

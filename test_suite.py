@@ -6,42 +6,28 @@ from main2 import ConnoFramer
 import pandas
 import os
 
-def create_test_lex():
-    test_lex = ["verb,agency,power", "abandons,agency_pos,power_agent", "abolishes,agency_pos,power_agent", "absorbs,agency_pos,power_agent",
-    "abuses,agency_pos,power_agent", "accompanies,agency_equal,power_theme", "addresses,agency_neg,power_equal"]
-    with open("test_lex.csv", "w") as test_lex_filename:
-        for n in test_lex:
-            test_lex_filename.write(n + "\n")
-
-def destroy_test_lex():
-    os.remove("test_lex.csv")
-
 def test_get_lemma():
     framer = ConnoFramer()
     assert framer._ConnoFramer__get_lemma_spacy("accompanies") == "accompany"
     assert framer._ConnoFramer__get_lemma_spacy("trying") == "try"
 
 def test_load_power():
-    create_test_lex()
     framer = ConnoFramer()
-    framer.load_lexicon("test_lex.csv", 'verb', 'power')
-    destroy_test_lex()
+    framer.load_lexicon('power')
 
-    assert len(framer.verb_score_dict) == 6
+    assert len(framer.verb_score_dict) == 1716
     assert framer.verb_score_dict["abolish"]["agent"] == 1
-    assert framer.verb_score_dict["abolish"]["theme"] == 0
-    assert framer.verb_score_dict["accompany"]["agent"] == 0
+    assert framer.verb_score_dict["abolish"]["theme"] == -1
+    assert framer.verb_score_dict["accompany"]["agent"] == -1
     assert framer.verb_score_dict["address"]["agent"] == 0
     assert framer.verb_score_dict["address"]["theme"] == 0
 
 
 def test_load_agency():
-    create_test_lex()
     framer = ConnoFramer()
-    framer.load_lexicon("test_lex.csv", 'verb', 'agency')
-    destroy_test_lex()
+    framer.load_lexicon('agency')
 
-    assert len(framer.verb_score_dict) == 6
+    assert len(framer.verb_score_dict) == 2109
     assert framer.verb_score_dict["abolish"]["agent"] == 1
     assert framer.verb_score_dict["abolish"]["theme"] == 0
     assert framer.verb_score_dict["accompany"]["agent"] == 0
@@ -101,40 +87,33 @@ def test_noChains():
     assert len(dobj_verb_count_dict) == 0
 
 def test_score_document():
-    create_test_lex()
     framer = ConnoFramer()
-    framer.load_lexicon("test_lex.csv", 'verb', 'power')
-    destroy_test_lex()
+    framer.load_lexicon('power')
 
     text = "I accompanied Brian Smith to the store, because he had abandoned his bike there. Brian also absorbs lots of complaints, \
-    so I address him as doctor. I also have a friend named Brian Jones. Brian Jones abuses free food."
+    so I address him as doctor. I also unearthed a friend named Brian Jones. Brian Jones abuses free food."
 
     _nsubj_verb_count_dict, _dobj_verb_count_dict = framer._ConnoFramer__parseAndExtractFrames(text)
     persona_score_dict, persona_scored_verbs_dict  = framer._ConnoFramer__score_document(_nsubj_verb_count_dict, _dobj_verb_count_dict)
 
     # I: accompany, address, have
-    # have is not in test dict, address is power_equal, accompany is power_theme
-    assert persona_score_dict["i"]["negative"] == 1
-    assert persona_score_dict["i"]["positive"] == 0
+    # unearthed is not in the lexicon, address is power_equal, accompany is power_theme
+    assert persona_score_dict["i"] == -1
 
     # accompany and address are in lexicon
     assert persona_scored_verbs_dict["i"] == 2
 
     # Brian Smith: dobj of accompany (power_theme +1), abandoned (power_agent +1), absorb (power_agent +1), dobj of address (equal)
-    assert persona_score_dict["brian smith"]["negative"] == 0
-    assert persona_score_dict["brian smith"]["positive"] == 3
+    assert persona_score_dict["brian smith"] == 3
     assert persona_scored_verbs_dict["brian smith"] == 4
 
     # Brian Jones: abuses (power_agent +1)
-    assert persona_score_dict["brian jones"]["negative"] == 0
-    assert persona_score_dict["brian jones"]["positive"] == 1
+    assert persona_score_dict["brian jones"] == 1
     assert persona_scored_verbs_dict["brian jones"] == 1
 
 def test_get_persona_counts_per_document():
-    create_test_lex()
     framer = ConnoFramer()
-    framer.load_lexicon("test_lex.csv", 'verb', 'power')
-    destroy_test_lex()
+    framer.load_lexicon('power')
 
     text = "I accompanied Brian Smith to the store, because he had abandoned his bike there. Brian also absorbs lots of complaints, \
     so I address him as doctor. I also have a friend named Brian Jones. Brian Jones abuses free food."
@@ -153,10 +132,8 @@ def test_get_persona_counts_per_document():
 # Other components test parts of the train pipeline, this one tests it in full
 # It also inadverntly tests having pronoun direct objects (e.g. me)
 def test_train():
-    create_test_lex()
     framer = ConnoFramer()
-    framer.load_lexicon("test_lex.csv", 'verb', 'power')
-    destroy_test_lex()
+    framer.load_lexicon('power')
 
     texts = ["I accompanied Brian Smith to the store, because he had abandoned his bike there. Brian also absorbs lots of complaints, \
     so I address him as doctor. I also have a friend named Brian Jones. Brian Jones abuses free food.",
@@ -166,12 +143,9 @@ def test_train():
     persona_score_dict = framer.get_score_totals()
 
     # These are same values as previous test with the added sentence: Brian Smith accompanies me, which is +1 i and -1 brian smith
-    assert persona_score_dict["i"]["negative"] == 1
-    assert persona_score_dict["i"]["positive"] == 1
-    assert persona_score_dict["brian smith"]["negative"] == 1
-    assert persona_score_dict["brian smith"]["positive"] == 3
-    assert persona_score_dict["brian jones"]["negative"] == 0
-    assert persona_score_dict["brian jones"]["positive"] == 1
+    assert persona_score_dict["i"] == 0
+    assert persona_score_dict["brian smith"] == 2
+    assert persona_score_dict["brian jones"] == 1
 
     persona_count_dict_1 = framer.count_personas_for_doc(0)
     assert persona_count_dict_1["i"] == 3
@@ -184,24 +158,18 @@ def test_train():
     persona_count_dict_2 = framer.count_personas_for_doc(1)
     assert persona_count_dict_2["i"] == 1
     assert persona_count_dict_2["brian smith"] == 1
-    assert persona_count_dict_2["brian jones"] == 0
+    assert "brian jones" not in persona_count_dict_2
     
 
     persona_score_dict_1 = framer.get_scores_for_doc(0)
-    assert persona_score_dict_1["i"]["negative"] == 1
-    assert persona_score_dict_1["i"]["positive"] == 0
-    assert persona_score_dict_1["brian smith"]["negative"] == 0
-    assert persona_score_dict_1["brian smith"]["positive"] == 3
-    assert persona_score_dict_1["brian jones"]["negative"] == 0
-    assert persona_score_dict_1["brian jones"]["positive"] == 1
+    assert persona_score_dict_1["i"] == -1
+    assert persona_score_dict_1["brian smith"] == 3
+    assert persona_score_dict_1["brian jones"] == 1
 
     persona_score_dict_2 = framer.get_scores_for_doc(1)
-    assert persona_score_dict_2["i"]["negative"] == 0
-    assert persona_score_dict_2["i"]["positive"] == 1
-    assert persona_score_dict_2["brian smith"]["negative"] == 1
-    assert persona_score_dict_2["brian smith"]["positive"] == 0
-    assert persona_score_dict_2["brian jones"]["negative"] == 0
-    assert persona_score_dict_2["brian jones"]["positive"] == 0
+    assert persona_score_dict_2["i"]== 1
+    assert persona_score_dict_2["brian smith"] == -1
+    assert "brian jones" not in persona_score_dict_2
 
     nsubj_doc1 = framer.count_nsubj_for_doc(0)
     dobj_doc1 = framer.count_dobj_for_doc(0)
@@ -236,3 +204,6 @@ def test_find_people():
     framer = ConnoFramer()
     subj_verb_count_dict, dobj_verb_count_dict = framer._ConnoFramer__parseAndExtractFrames(text)
     assert len(subj_verb_count_dict) == 2
+
+
+test_score_document()
