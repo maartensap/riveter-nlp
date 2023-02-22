@@ -13,6 +13,7 @@ nlp.add_pipe(neuralcoref.NeuralCoref(nlp.vocab,blacklist=False),name="neuralcore
 
 ner_tags = ["PERSON"]
 
+
 # This is messy, but I think special-casing pronouns is probably the right thing to do
 pronoun_map = {
     "i": ["me", "my", "mine"],
@@ -49,7 +50,7 @@ class ConnoFramer:
         label can be any of [effect, state, value, perspective]
         """
 
-        lexicon_df = pd.read_csv('data/rashkin-lexicon/full_frame_info.txt', sep='\t')
+        lexicon_df = pd.read_csv('../data/rashkin-lexicon/full_frame_info.txt', sep='\t')
 
         verb_score_dict = defaultdict(lambda: defaultdict(int))
         for i, _row in lexicon_df.iterrows():
@@ -75,7 +76,7 @@ class ConnoFramer:
                       'agency_neg':   {'agent': -1, 'theme': 0},
                       'agency_equal': {'agent': 0, 'theme': 0}}
 
-        lexicon_df = pd.read_csv('data/sap-lexicon/agency_power.csv')
+        lexicon_df = pd.read_csv('../data/sap-lexicon/agency_power.csv')
 
         verb_score_dict = defaultdict(lambda: defaultdict(int))
         for i, _row in lexicon_df.iterrows():
