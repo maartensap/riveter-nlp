@@ -80,25 +80,4 @@ Replace `fakeStories.csv` with any .csv input file, formatted as follows:
 
 *Note that each text_id should be unique, but can have any value.* 
 
-<br>
-
-## To Do 🗒️
-
-- Before ACL demo deadline:
-   - ✅ adding agency
-   - ✅ adding other connotation frames (possibly)
-   - 🔲 normalize scores? or show how in demo
-   - 🔲 add new method for loading custom lexicons
-   - 🔲 add methods to get e.g. all the docs in which a persona was referenced, all the docs in which a verb was used
-   - 🔲 return the list of matched verbs (also easier if driven by test cases)?
-   - 🔲 add in more people lists other than doctor (that's going to be easier if driven by test cases)
-   - 🔲 adding in wildcard matches (related to conjugation?)
-   - 🔲 allow lexicon matches for people instead of coref (e.g., if I wanted scores for all the pronouns)
-   
-- If time before ACL demo deadline, but probably afterwards
-   - 🔲 adding other verb-related lexica (Verbnet??)
-   - 🔲 add in weighted lexicon (not sure what the goal would here, but a possible extension, esp. if someone ends up using a model to create a lexicon?)
-   - 🔲 allow non-coref option using persona lexicon (e.g., if I just wanted scores for all pronouns)
-
-
 
