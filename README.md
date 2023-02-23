@@ -1,8 +1,12 @@
-# ConnotationFramer
+# Riveter 💪
 
 <br>
 
-Package to extract connotation frames from a csv file and explore the output. 
+The Riveter 💪 package measures social dynamics between personas mentioned in a collection of texts.
+
+The package identifies and extracts the subjects, verbs, and direct objects in texts; it performs coreference resolution on the personas mentioned in the texts (e.g., clustering "Elizabeth Bennet", "Lizzy," and "she" together as one persona); and it measures social dynamics between the personas by referencing a given lexicon. The package currently includes Maarten Sap et al's lexicon for power and agency and Rashkin et al's lexicon for perspective, effect, value, and mental state. 
+
+The name Riveter is inspired by ["Rosie the Riveter,"](https://en.wikipedia.org/wiki/File:We_Can_Do_It!.jpg) the allegorical figure who came to represent American women working in factories and at other industrial jobs during World War II. Rosie the Riveter has become an iconic symbol of power and shifting gender roles — subjects that the Riveter package aims to help users measure and explore.    
 
 <br>
 
@@ -14,6 +18,8 @@ Requirements
 - pandas
 - spaCy 2.3.9
 - neuralcoref
+- seaborn
+- matplotlib
 
 ### Example installation instructions
 
@@ -39,6 +45,7 @@ git clone https://github.com/huggingface/neuralcoref.git
 cd neuralcoref
 pip install -r requirements.txt
 pip install -e .
+cd ..
 ```
 
 Install pandas and download spaCy files.
@@ -52,16 +59,16 @@ python -m spacy download en_core_web_sm
 
 ## Usage
 
-### conno_framer.py
+### riveter.py
 
-To run `conno_framer.py`, see the examples in `demo.ipynb` (both located in the `conno_framer` directory).
+To run `riveter.py`, see the examples in `demo.ipynb` (both located in the `riveter` directory).
 
 ```
-framer = ConnoFramer()  
-framer.load_sap_lexicon('power')
-framer.train(texts,
+riveter = Riveter()  
+riveter.load_sap_lexicon('power')
+riveter.train(texts,
              text_ids)
-persona_score_dict = framer.get_score_totals()  
+persona_score_dict = riveter.get_score_totals()  
 ```
 
 *Note: [Here](https://towardsdatascience.com/get-your-conda-environment-to-show-in-jupyter-notebooks-the-easy-way-17010b76e874) are some instructions for how to run `demo.ipynb` from the connoFramerEnv.*

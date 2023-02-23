@@ -4,6 +4,9 @@ import re
 
 import pandas as pd
 
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 from tqdm import tqdm
 
 import spacy
@@ -106,10 +109,53 @@ class Riveter:
 
     def get_score_totals(self):
         return dict(self.persona_score_dict)
+    
+    def plot_scores(self, number_of_scores = 10, title = "Personas by Score"):
+        
+        # Make scores dict into dataframe
+        df = pd.DataFrame(dict(self.persona_score_dict).items(), columns = ["persona", "score"])
+        df = df.sort_values(by = "score", ascending = False)
 
+        # If user asks for bottom x scores, e.g. -10
+        if number_of_scores < 0:
+            df = df[number_of_scores:]
+            df = df.sort_values(by = "score", ascending = True)
+            
+        # If user asks for top x scores, e.g. 10
+        else:
+            df = df[:number_of_scores]
+        
+        # Make bar plot with line at 0 
+        graph = sns.barplot(data= df, x="persona", y="score", color = "skyblue")
+        graph.axhline(0, c = "black")
+        plt.xticks(rotation=45, ha='right')
+        plt.title(title) 
+        plt.tight_layout()
 
     def get_scores_for_doc(self, doc_id):
         return dict(self.id_persona_score_dict[doc_id])
+    
+    def plot_scores_for_doc(self, doc_id, number_of_scores = 10, title = "Personas by Score"):
+        
+        # Make scores dict into dataframe
+        df = pd.DataFrame(dict(self.id_persona_score_dict[doc_id]).items(), columns = ["persona", "score"])
+        df = df.sort_values(by = "score", ascending = False)
+
+        # If user asks for bottom x scores, e.g. -10
+        if number_of_scores < 0:
+            df = df[number_of_scores:]
+            df = df.sort_values(by = "score", ascending = True)
+            
+        # If user asks for top x scores, eg. 10
+        else:
+            df = df[:number_of_scores]
+        
+        # Make bar plot with line at 0 
+        graph = sns.barplot(data= df, x="persona", y="score", color = "skyblue")
+        graph.axhline(0, c = "black")
+        plt.xticks(rotation=45, ha='right')
+        plt.title(title) 
+        plt.tight_layout()
 
 
     # TODO: this would be helpful for debugging and result inspection
