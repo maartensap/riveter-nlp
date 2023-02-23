@@ -11,7 +11,10 @@ nlp = spacy.load('en_core_web_sm')
 import neuralcoref
 nlp.add_pipe(neuralcoref.NeuralCoref(nlp.vocab,blacklist=False),name="neuralcoref")
 
-ner_tags = ["PERSON"]
+
+NER_TAGS = ["PERSON"]
+
+PRONOUNS = ['he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'they', 'them', 'their', 'themselves']
 
 
 # This is messy, but I think special-casing pronouns is probably the right thing to do
@@ -29,13 +32,14 @@ for p, forms in pronoun_map.items():
 class Riveter:
 
     def __init__(self):
-        self.verb_score_dict = {}
-        self.persona_score_dict = {}
-        self.id_persona_score_dict = {}
-        self.id_persona_count_dict = {}
-        self.id_nsubj_verb_count_dict = {}
-        self.id_dobj_verb_count_dict = {}
-        self.id_persona_scored_verb_dict = {}
+        self.verb_score_dict = None
+        self.persona_score_dict = None
+        self.id_persona_score_dict = None
+        self.id_persona_count_dict = None
+        self.id_nsubj_verb_count_dict = None
+        self.id_dobj_verb_count_dict = None
+        self.id_persona_scored_verb_dict = None
+        self.entity_match_count_dict = defaultdict(lambda: defaultdict(int))
 
 
     def load_lexicon(self, label):
@@ -95,7 +99,7 @@ class Riveter:
             self.id_persona_count_dict, \
             self.id_nsubj_verb_count_dict, \
             self.id_dobj_verb_count_dict, \
-        self.id_persona_scored_verb_dict = self.__score_dataset(self.texts, self.text_ids)
+            self.id_persona_scored_verb_dict = self.__score_dataset(self.texts, self.text_ids)
 
 
     def get_score_totals(self):
@@ -123,6 +127,11 @@ class Riveter:
 
     def count_dobj_for_doc(self, doc_id):
         return dict(self.id_dobj_verb_count_dict[doc_id])
+    
+    
+    def get_persona_cluster(self, persona):
+        return dict(self.entity_match_count_dict[persona.lower()]) # TODO: possibly shouldn't lower case here? 
+                                                                   #       is it possible to have multiple entities whose only difference is capitalization?
 
 
     # def __loadFile(self, input_file, text_column, id_column):
@@ -155,7 +164,7 @@ class Riveter:
         # This checks if each coref cluster contains a "person", and only keeps clusters that contain at least 1 person
         # it also adds singletons
         for span in spacyDoc.noun_chunks:
-            isPerson = len(span.ents) > 0 and any([e.label_ in ner_tags for e in span.ents])
+            isPerson = len(span.ents) > 0 and any([e.label_ in NER_TAGS for e in span.ents])
             isPerson = isPerson or any([w.text.lower()==p.lower() for w in span for p in peopleWords])
             
             if isPerson:
@@ -185,6 +194,7 @@ class Riveter:
 
         newPeopleClusters = [neuralcoref.neuralcoref.Cluster(i,main,mentions)
                             for i,(main, mentions) in enumerate(newClusters.items())]
+
         return newPeopleClusters
     
 
@@ -195,27 +205,31 @@ class Riveter:
 
         doc = nlp(text)
 
-        # coref clusters
-        clusters = self.__getPeopleClusters(doc,peopleWords=peopleWords)
-        # clusters is a list of neuralcoref.Cluster s (which is essentially a
-        # list of spacy Spans which represent the mentions -- along with a "main" mention)
-        # clusters[0] is the list of mentions, clusters[0][0] is the first mention (spacy Span)
-        # clusters[0].main is the main mention (e.g., name)
+        clusters = self.__getPeopleClusters(doc, peopleWords=peopleWords)
 
         for _cluster in clusters:
-            for _span in _cluster:
-            
-                if _span.root.dep_ == 'nsubj':
-                    _nusbj = str(_cluster.main).lower()
-                    _nusbj = pronoun_special_cases.get(_nusbj, _nusbj)
-                    _verb = _span.root.head.lemma_.lower()
-                    nsubj_verb_count_dict[(_nusbj, _verb)] += 1   
 
-                elif _span.root.dep_ == 'dobj':
-                    _dobj = str(_cluster.main).lower()
-                    _dobj = pronoun_special_cases.get(_dobj, _dobj)
-                    _verb = _span.root.head.lemma_.lower() 
-                    dobj_verb_count_dict[(_dobj, _verb)] += 1   
+            _num_non_pronouns = len([_span for _span in _cluster if str(_span).lower() not in PRONOUNS])
+
+            # If the cluster is only third person pronouns, don't include it (coref failed to match to an entity)
+            # Second condition handles weird edge case where the cluster key is in PRONOUNS but the spands include "you" or "I"
+            if _num_non_pronouns > 0 and str(_cluster.main).lower() not in PRONOUNS:
+
+                for _span in _cluster:
+
+                    self.entity_match_count_dict[str(_cluster.main).lower()][str(_span).lower()] += 1
+                
+                    if _span.root.dep_ == 'nsubj':
+                        _nusbj = str(_cluster.main).lower()
+                        _nusbj = pronoun_special_cases.get(_nusbj, _nusbj)
+                        _verb = _span.root.head.lemma_.lower()
+                        nsubj_verb_count_dict[(_nusbj, _verb)] += 1   
+
+                    elif _span.root.dep_ == 'dobj':
+                        _dobj = str(_cluster.main).lower()
+                        _dobj = pronoun_special_cases.get(_dobj, _dobj)
+                        _verb = _span.root.head.lemma_.lower() 
+                        dobj_verb_count_dict[(_dobj, _verb)] += 1   
 
         return nsubj_verb_count_dict, dobj_verb_count_dict
 

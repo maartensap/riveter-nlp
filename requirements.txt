@@ -1,4 +1,5 @@
+neuralcoref
+spacy 2.3.9
 numpy
 pandas
-spacy
-neuralcoref
+
