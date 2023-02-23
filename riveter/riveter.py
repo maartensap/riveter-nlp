@@ -3,6 +3,7 @@ from datetime import datetime
 import re
 import os
 import pandas as pd
+import pickle
 
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -32,10 +33,13 @@ for p, forms in pronoun_map.items():
     for f in forms:
         pronoun_special_cases[f] = p
 
+def default_dict_int():
+        return defaultdict(int)
+
 
 class Riveter:
 
-    def __init__(self):
+    def __init__(self, filename=None):
         self.verb_score_dict = None
         self.persona_score_dict = None
         self.id_persona_score_dict = None
@@ -43,11 +47,26 @@ class Riveter:
         self.id_nsubj_verb_count_dict = None
         self.id_dobj_verb_count_dict = None
         self.id_persona_scored_verb_dict = None
-        self.entity_match_count_dict = defaultdict(lambda: defaultdict(int))
+        self.entity_match_count_dict = defaultdict(default_dict_int)
         self.persona_count_dict = defaultdict(int)
         self.people_words = None
 
+        if filename:
+            with open(filename, 'rb') as f:
+                my_riveter = pickle.load(f)
+            
+            for k in my_riveter.__dict__.keys():
+                if k in self.__dict__.keys():
+                    setattr(self, k, getattr(my_riveter, k))
 
+    def save(self, filename='riveter.pkl'):
+        with open(filename, 'wb') as file:
+            # for k, v in self.__dict__.items():
+            #     if isinstance(v, dict):
+            #         setattr(self, k, dict(v))
+            pickle.dump(self, file, pickle.HIGHEST_PROTOCOL)
+            print(f'Riveter successfully saved to "{filename}"')
+ 
     def load_lexicon(self, label):
         if label in ['power', 'agency']:
             self.load_sap_lexicon(label)
@@ -62,7 +81,7 @@ class Riveter:
 
         lexicon_df = pd.read_csv(os.path.join(basepath,'data/rashkin-lexicon/full_frame_info.txt', sep='\t'))
 
-        verb_score_dict = defaultdict(lambda: defaultdict(int))
+        verb_score_dict = defaultdict(default_dict_int)
         for i, _row in lexicon_df.iterrows():
 
             _lemma  = _row['verb'].strip()
@@ -88,7 +107,7 @@ class Riveter:
 
         lexicon_df = pd.read_csv(os.path.join(basepath,'data/sap-lexicon/agency_power.csv'))
 
-        verb_score_dict = defaultdict(lambda: defaultdict(int))
+        verb_score_dict = defaultdict(default_dict_int)
         for i, _row in lexicon_df.iterrows():
             if not pd.isnull(_row[label_column]):
                 _lemma  = _row['verb'].strip()
