@@ -1,7 +1,7 @@
 from collections import defaultdict
 from datetime import datetime
 import re
-
+import os
 import pandas as pd
 
 import seaborn as sns
@@ -19,7 +19,7 @@ nlp.add_pipe(neuralcoref.NeuralCoref(nlp.vocab,blacklist=False),name="neuralcore
 NER_TAGS = ["PERSON"]
 
 PRONOUNS = ['he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'they', 'them', 'their', 'themselves']
-
+basepath = os.path.dirname(__file__)
 
 # This is messy, but I think special-casing pronouns is probably the right thing to do
 pronoun_map = {
@@ -45,6 +45,7 @@ class Riveter:
         self.id_persona_scored_verb_dict = None
         self.entity_match_count_dict = defaultdict(lambda: defaultdict(int))
         self.persona_count_dict = defaultdict(int)
+        self.people_words = None
 
 
     def load_lexicon(self, label):
@@ -59,7 +60,7 @@ class Riveter:
         label can be any of [effect, state, value, perspective]
         """
 
-        lexicon_df = pd.read_csv('data/rashkin-lexicon/full_frame_info.txt', sep='\t')
+        lexicon_df = pd.read_csv(os.path.join(basepath,'data/rashkin-lexicon/full_frame_info.txt', sep='\t'))
 
         verb_score_dict = defaultdict(lambda: defaultdict(int))
         for i, _row in lexicon_df.iterrows():
@@ -85,7 +86,7 @@ class Riveter:
                       'agency_neg':   {'agent': -1, 'theme': 0},
                       'agency_equal': {'agent': 0, 'theme': 0}}
 
-        lexicon_df = pd.read_csv('data/sap-lexicon/agency_power.csv')
+        lexicon_df = pd.read_csv(os.path.join(basepath,'data/sap-lexicon/agency_power.csv'))
 
         verb_score_dict = defaultdict(lambda: defaultdict(int))
         for i, _row in lexicon_df.iterrows():
@@ -95,6 +96,15 @@ class Riveter:
         
         self.verb_score_dict = verb_score_dict
 
+    def set_people_words(self, people_words=[], load_default=False):
+        if len(people_words) == 0 and load_default:
+            with open(os.path.join(basepath,'data/generic_people.txt')) as f:
+                self.people_words = f.read().splitlines()
+        else:
+            self.people_words = people_words
+
+    def add_people_words(self, people_word):
+        self.people_words.extend([people_word])
 
     def train(self, texts, text_ids, persona_patterns_dict=None):
         self.texts = texts
@@ -250,14 +260,17 @@ class Riveter:
         return newPeopleClusters
     
 
-    def __parse_and_extract_coref(self, text, peopleWords=["doctor", "i", "me", "you", "he", "she", "man", "woman"]):
+    def __parse_and_extract_coref(self, text):
 
         nsubj_verb_count_dict = defaultdict(int)
         dobj_verb_count_dict = defaultdict(int)
 
         doc = nlp(text)
 
-        clusters = self.__getPeopleClusters(doc, peopleWords=peopleWords)
+        if self.people_words is None:
+            self.set_people_words(load_default=True)
+
+        clusters = self.__getPeopleClusters(doc, peopleWords=self.people_words)
 
         for _cluster in clusters:
 
