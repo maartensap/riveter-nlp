@@ -40,6 +40,7 @@ class Riveter:
         self.id_dobj_verb_count_dict = None
         self.id_persona_scored_verb_dict = None
         self.entity_match_count_dict = defaultdict(lambda: defaultdict(int))
+        self.persona_count_dict = defaultdict(int)
 
 
     def load_lexicon(self, label):
@@ -112,6 +113,10 @@ class Riveter:
 
     # TODO: this would be helpful for debugging and result inspection
     # def get_docs_for_persona(self, persona):
+
+
+    def get_persona_counts(self):
+        return self.persona_count_dict
 
 
     def count_personas_for_doc(self, doc_id):
@@ -217,19 +222,19 @@ class Riveter:
 
                 for _span in _cluster:
 
-                    self.entity_match_count_dict[str(_cluster.main).lower()][str(_span).lower()] += 1
+                    _cluster_text = str(_cluster.main).lower()
+                    _cluster_text = pronoun_special_cases.get(_cluster_text, _cluster_text)
+
+                    self.persona_count_dict[_cluster_text] += 1
+                    self.entity_match_count_dict[_cluster_text][str(_span).lower()] += 1
                 
                     if _span.root.dep_ == 'nsubj':
-                        _nusbj = str(_cluster.main).lower()
-                        _nusbj = pronoun_special_cases.get(_nusbj, _nusbj)
                         _verb = _span.root.head.lemma_.lower()
-                        nsubj_verb_count_dict[(_nusbj, _verb)] += 1   
+                        nsubj_verb_count_dict[(_cluster_text, _verb)] += 1   
 
                     elif _span.root.dep_ == 'dobj':
-                        _dobj = str(_cluster.main).lower()
-                        _dobj = pronoun_special_cases.get(_dobj, _dobj)
                         _verb = _span.root.head.lemma_.lower() 
-                        dobj_verb_count_dict[(_dobj, _verb)] += 1   
+                        dobj_verb_count_dict[(_cluster_text, _verb)] += 1   
 
         return nsubj_verb_count_dict, dobj_verb_count_dict
 
@@ -252,6 +257,14 @@ class Riveter:
                 persona_scored_verbs_dict[_persona] += 1
                 _theme_score = self.verb_score_dict[_verb]['theme']
                 persona_score_dict[_persona] += (_count*_theme_score)
+
+        # persona_score_dict = {p: s/float(persona_count_dict[p]) for p, s in persona_score_dict.items()} # do this later instead
+
+        # FOR DEBUGGING
+        # print('nsubj_verb_count_dict', nsubj_verb_count_dict)
+        # print('dobj_verb_count_dict', dobj_verb_count_dict)
+        # print('persona_count_dict', persona_count_dict)
+        # print('persona_score_dict', persona_score_dict)
 
         return persona_score_dict, persona_scored_verbs_dict
 
@@ -279,6 +292,9 @@ class Riveter:
         for _id, _persona_score_dict in id_persona_score_dict.items():
             for _persona, _score in _persona_score_dict.items():
                 persona_score_dict[_persona] += _score
+
+        # Normalize the scores over the total number of nsubj and dobj occurrences in the dataset for this persona
+        persona_score_dict = {p: s/float(self.persona_count_dict[p]) for p, s in persona_score_dict.items()}
 
         print(str(datetime.now())[:-7] + ' Complete!')
         return persona_score_dict, id_persona_score_dict, id_persona_count_dict, id_nsubj_verb_count_dict, id_dobj_verb_count_dict, id_persona_scored_verb_dict
