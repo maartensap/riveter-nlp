@@ -190,13 +190,23 @@ class Riveter:
     def count_scored_verbs_for_doc(self, doc_id):
         return dict(self.id_persona_scored_verb_dict[doc_id])
 
+    def count_nsubj_for_doc(self, doc_id, matched_only=False):
+        """Returns the set of persona-verb pairs (where persona is the subject of the verb)
+        matched_only: only returns the verbs that are in the lexicon
+        """
+        counts = dict(self.id_nsubj_verb_count_dict[doc_id])
+        if matched_only:
+            counts = {pair: cnt for pair,cnt in counts.items() if pair[1] in self.verb_score_dict}
+        return counts
 
-    def count_nsubj_for_doc(self, doc_id):
-        return dict(self.id_nsubj_verb_count_dict[doc_id])
-
-
-    def count_dobj_for_doc(self, doc_id):
-        return dict(self.id_dobj_verb_count_dict[doc_id])
+    def count_dobj_for_doc(self, doc_id,matched_only=False):
+        """Returns the set of persona-verb pairs (where persona is the object of the verb)
+        matched_only: only returns the verbs that are in the lexicon
+        """
+        counts = dict(self.id_dobj_verb_count_dict[doc_id])
+        if matched_only:
+            counts = {pair: cnt for pair,cnt in counts.items() if pair[1] in self.verb_score_dict}
+        return counts
     
     
     def get_persona_cluster(self, persona):
@@ -214,11 +224,25 @@ class Riveter:
         clusters = spacyDoc._.coref_clusters
         return clusters
 
+    def __isSpanPerson(self,span,peopleWords):     
+        isPerson = len(span.ents) > 0
+        isPerson = isPerson and any([e.label_ in NER_TAGS for e in span.ents])
+        isPerson = isPerson or any([w.text.lower()==p.lower() for w in span for p in peopleWords])
+        return isPerson
 
+    def __isClusterPerson(self,cluster,peopleWords):
+        areMentionsPeople = [self.__isSpanPerson(m,peopleWords) for m in cluster.mentions]
+        
+        if all(areMentionsPeople):
+            return True
+        
+        pctMentionsPeople = sum(areMentionsPeople) / len(areMentionsPeople)
+        return pctMentionsPeople >=.5
+    
     def __getPeopleClusters(self, spacyDoc, peopleWords):
 
         clusters = self.__getCorefClusters(spacyDoc)
-
+        
         # need to add singleton clusters for tokens detected as people 
         singletons = {}
         
@@ -234,11 +258,12 @@ class Riveter:
         # This checks if each coref cluster contains a "person", and only keeps clusters that contain at least 1 person
         # it also adds singletons
         for span in spacyDoc.noun_chunks:
-            isPerson = len(span.ents) > 0 and any([e.label_ in NER_TAGS for e in span.ents])
-            isPerson = isPerson or any([w.text.lower()==p.lower() for w in span for p in peopleWords])
+            isPerson = self.__isSpanPerson(span,peopleWords)
+            # isPerson2 = len(span.ents) > 0 and any([e.label_ in NER_TAGS for e in span.ents])
+            # isPerson2 = isPerson2 or any([w.text.lower()==p.lower() for w in span for p in peopleWords])
             
             if isPerson:
-
+        
                 # check if it's in the clusters to add people
                 inClusterAlready = False
                 for c in clusters:
@@ -247,10 +272,19 @@ class Riveter:
                         peopleClusters.add(c)
                         inClusterAlready = True
                 
-                # also add singletons
+                # also add singletons, which may be real singletons or mis-matched ones
                 if not inClusterAlready:
-                    #print(span)
-                    peopleClusters.add(neuralcoref.neuralcoref.Cluster(len(clusters),span,[span]))
+                    # simple heuristic to fix coref bug:
+                    # if the span text is the exact same as the main cluster mention, merge
+                    
+                    matched = [c for c in peopleClusters if c.main.text == span.text]
+                    if len(matched) > 0:
+                        matched = matched[0]
+                        matched.mentions.append(span)
+                    else:
+                        # else, make new cluster
+                        peopleClusters.add(neuralcoref.neuralcoref.Cluster(len(clusters),span,[span]))
+
 
         # Re-iterating over noun chunks, that's the entities that are going to have verbs,
         # and removing the coref mentions that are not a noun chunk
@@ -264,12 +298,15 @@ class Riveter:
 
         newPeopleClusters = [neuralcoref.neuralcoref.Cluster(i,main,mentions)
                             for i,(main, mentions) in enumerate(newClusters.items())]
+        newPeopleClusters = [c for c in newPeopleClusters if self.__isClusterPerson(c,peopleWords)]
 
         return newPeopleClusters
     
 
     def __parse_and_extract_coref(self, text):
-
+        # todo possibly: keep track of each spacy.Token / Span and return those along with the str representation, so
+        # that we can use that info later to visualize the lexicon output
+        
         nsubj_verb_count_dict = defaultdict(int)
         dobj_verb_count_dict = defaultdict(int)
 
@@ -376,6 +413,7 @@ class Riveter:
         return persona_score_dict, persona_scored_verbs_dict
 
 
+    
     def __score_dataset(self, texts, text_ids, persona_patterns_dict):
 
         id_nsubj_verb_count_dict = {}
@@ -393,7 +431,6 @@ class Riveter:
 
             _persona_score_dict, _persona_scored_verb_dict = self.__score_document(_nsubj_verb_count_dict, _dobj_verb_count_dict)
             _persona_count_dict = self.__get_persona_counts_per_document(_nsubj_verb_count_dict, _dobj_verb_count_dict)
-
 
             id_persona_score_dict[_id] = _persona_score_dict
             id_persona_count_dict[_id] = _persona_count_dict

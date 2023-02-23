@@ -1,3 +1,16 @@
+I
+myself
+me
+you
+yourself
+he
+she
+her
+himself
+herself
+him
+they
+them
 guy
 girl
 husband
@@ -24,6 +37,7 @@ girlfriend
 boyfriend
 boss
 kid
+king
 partner
 people
 accountant
@@ -247,6 +261,7 @@ psychologist
 publisher
 quarterback
 quilter
+queen
 radiologist
 rancher
 ranger
