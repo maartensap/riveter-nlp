@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
+import re
 
 import pandas as pd
 
@@ -55,7 +56,7 @@ class Riveter:
         label can be any of [effect, state, value, perspective]
         """
 
-        lexicon_df = pd.read_csv('../data/rashkin-lexicon/full_frame_info.txt', sep='\t')
+        lexicon_df = pd.read_csv('data/rashkin-lexicon/full_frame_info.txt', sep='\t')
 
         verb_score_dict = defaultdict(lambda: defaultdict(int))
         for i, _row in lexicon_df.iterrows():
@@ -81,7 +82,7 @@ class Riveter:
                       'agency_neg':   {'agent': -1, 'theme': 0},
                       'agency_equal': {'agent': 0, 'theme': 0}}
 
-        lexicon_df = pd.read_csv('../data/sap-lexicon/agency_power.csv')
+        lexicon_df = pd.read_csv('data/sap-lexicon/agency_power.csv')
 
         verb_score_dict = defaultdict(lambda: defaultdict(int))
         for i, _row in lexicon_df.iterrows():
@@ -92,7 +93,7 @@ class Riveter:
         self.verb_score_dict = verb_score_dict
 
 
-    def train(self, texts, text_ids):
+    def train(self, texts, text_ids, persona_patterns_dict=None):
         self.texts = texts
         self.text_ids = text_ids
         self.persona_score_dict, \
@@ -100,7 +101,7 @@ class Riveter:
             self.id_persona_count_dict, \
             self.id_nsubj_verb_count_dict, \
             self.id_dobj_verb_count_dict, \
-            self.id_persona_scored_verb_dict = self.__score_dataset(self.texts, self.text_ids)
+            self.id_persona_scored_verb_dict = self.__score_dataset(self.texts, self.text_ids, persona_patterns_dict)
 
 
     def get_score_totals(self):
@@ -203,7 +204,7 @@ class Riveter:
         return newPeopleClusters
     
 
-    def __parseAndExtractFrames(self, text, peopleWords=["doctor", "i", "me", "you", "he", "she", "man", "woman"]):
+    def __parse_and_extract_coref(self, text, peopleWords=["doctor", "i", "me", "you", "he", "she", "man", "woman"]):
 
         nsubj_verb_count_dict = defaultdict(int)
         dobj_verb_count_dict = defaultdict(int)
@@ -235,6 +236,45 @@ class Riveter:
                     elif _span.root.dep_ == 'dobj':
                         _verb = _span.root.head.lemma_.lower() 
                         dobj_verb_count_dict[(_cluster_text, _verb)] += 1   
+
+        return nsubj_verb_count_dict, dobj_verb_count_dict
+    
+
+    def __parse_and_extract(self, text, persona_patterns_dict):
+
+        nsubj_verb_count_dict = defaultdict(int)
+        dobj_verb_count_dict = defaultdict(int)
+
+        doc = nlp(text)
+
+        for _parsed_sentence in doc.sents:
+            for _noun_chunk in _parsed_sentence.noun_chunks:   
+
+                if _noun_chunk.root.dep_ == 'nsubj':
+
+                    for _persona, _pattern in persona_patterns_dict.items():
+
+                        if re.findall(_pattern, _noun_chunk.text.lower()):
+
+                            self.persona_count_dict[_persona] += 1
+                            self.entity_match_count_dict[_persona][_noun_chunk.text.lower()] += 1
+
+                            _nusbj = _persona
+                            _verb = _noun_chunk.root.head.lemma_.lower()
+                            nsubj_verb_count_dict[(_nusbj, _verb)] += 1     
+
+                elif _noun_chunk.root.dep_ == 'dobj':
+
+                    for _persona, _pattern in persona_patterns_dict.items():
+
+                        if re.findall(_pattern, _noun_chunk.text.lower()):
+
+                            self.persona_count_dict[_persona] += 1
+                            self.entity_match_count_dict[_persona][_noun_chunk.text.lower()] += 1
+
+                            _dobj = _persona
+                            _verb = _noun_chunk.root.head.lemma_.lower() 
+                            dobj_verb_count_dict[(_dobj, _verb)] += 1   
 
         return nsubj_verb_count_dict, dobj_verb_count_dict
 
@@ -269,7 +309,7 @@ class Riveter:
         return persona_score_dict, persona_scored_verbs_dict
 
 
-    def __score_dataset(self, texts, text_ids):
+    def __score_dataset(self, texts, text_ids, persona_patterns_dict):
 
         id_nsubj_verb_count_dict = {}
         id_dobj_verb_count_dict = {}
@@ -278,9 +318,15 @@ class Riveter:
         id_persona_scored_verb_dict = {}
 
         for _text, _id in tqdm(zip(texts, text_ids), total=len(texts)):
-            _nsubj_verb_count_dict, _dobj_verb_count_dict = self.__parseAndExtractFrames(_text)
+
+            if not persona_patterns_dict:
+                _nsubj_verb_count_dict, _dobj_verb_count_dict = self.__parse_and_extract_coref(_text)
+            else:
+                _nsubj_verb_count_dict, _dobj_verb_count_dict = self.__parse_and_extract(_text, persona_patterns_dict)
+
             _persona_score_dict, _persona_scored_verb_dict = self.__score_document(_nsubj_verb_count_dict, _dobj_verb_count_dict)
             _persona_count_dict = self.__get_persona_counts_per_document(_nsubj_verb_count_dict, _dobj_verb_count_dict)
+
 
             id_persona_score_dict[_id] = _persona_score_dict
             id_persona_count_dict[_id] = _persona_count_dict
@@ -294,7 +340,7 @@ class Riveter:
                 persona_score_dict[_persona] += _score
 
         # Normalize the scores over the total number of nsubj and dobj occurrences in the dataset for this persona
-        persona_score_dict = {p: s/float(self.persona_count_dict[p]) for p, s in persona_score_dict.items()}
+        persona_score_dict = {p: s/float(self.persona_count_dict[p]) for p, s in persona_score_dict.items() if self.persona_count_dict[p] > 0}
 
         print(str(datetime.now())[:-7] + ' Complete!')
         return persona_score_dict, id_persona_score_dict, id_persona_count_dict, id_nsubj_verb_count_dict, id_dobj_verb_count_dict, id_persona_scored_verb_dict

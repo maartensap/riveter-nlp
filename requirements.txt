@@ -1,5 +1,5 @@
-neuralcoref
-spacy 2.3.9
-numpy
-pandas
+neuralcoref==4.0
+spacy==2.3.9
+numpy==1.24.1
+pandas==1.5.2
 
