@@ -96,6 +96,7 @@ class Riveter:
         
         self.verb_score_dict = verb_score_dict
 
+
     def set_people_words(self, people_words=[], load_default=False):
         if len(people_words) == 0 and load_default:
             with open(os.path.join(basepath,'data/generic_people.txt')) as f:
@@ -103,8 +104,10 @@ class Riveter:
         else:
             self.people_words = people_words
 
+
     def add_people_words(self, people_word):
         self.people_words.extend([people_word])
+
 
     def train(self, texts, text_ids, persona_patterns_dict=None):
         self.texts = texts
@@ -117,13 +120,15 @@ class Riveter:
             self.id_persona_scored_verb_dict = self.__score_dataset(self.texts, self.text_ids, persona_patterns_dict)
 
 
-    def get_score_totals(self):
-        return dict(self.persona_score_dict)
+    def get_score_totals(self, frequency_threshold=0):
+        return {p: s for p, s in self.persona_score_dict.items() if self.persona_count_dict[p] >= frequency_threshold}
     
-    def plot_scores(self, number_of_scores = 10, title = "Personas by Score"):
+
+    def plot_scores(self, number_of_scores = 10, title = "Personas by Score", frequency_threshold=0):
         
         # Make scores dict into dataframe
-        df = pd.DataFrame(dict(self.persona_score_dict).items(), columns = ["persona", "score"])
+        _normalized_dict = self.get_score_totals(frequency_threshold)
+        df = pd.DataFrame(_normalized_dict.items(), columns = ["persona", "score"])
         df = df.sort_values(by = "score", ascending = False)
 
         # If user asks for bottom x scores, e.g. -10
@@ -142,13 +147,16 @@ class Riveter:
         plt.title(title) 
         plt.tight_layout()
 
+
     def get_scores_for_doc(self, doc_id):
-        return dict(self.id_persona_score_dict[doc_id])
+        return {p: s/float(self.id_persona_count_dict[doc_id][p]) for p, s in self.id_persona_score_dict[doc_id].items()}
     
+
     def plot_scores_for_doc(self, doc_id, number_of_scores = 10, title = "Personas by Score"):
         
         # Make scores dict into dataframe
-        df = pd.DataFrame(dict(self.id_persona_score_dict[doc_id]).items(), columns = ["persona", "score"])
+        _normalized_dict =  self.get_scores_for_doc(doc_id)
+        df = pd.DataFrame(_normalized_dict.items(), columns = ["persona", "score"])
         df = df.sort_values(by = "score", ascending = False)
 
         # If user asks for bottom x scores, e.g. -10
