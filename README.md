@@ -26,15 +26,15 @@ Requirements
 We recommend creating a new virtual environment. Activate this environment before installing and before running the code.
 
 ```
-conda create -n connoFramerEnv python=3.8
-conda activate connoFramerEnv
+conda create -n riveterEnv python=3.8
+conda activate riveterEnv
 ```
 
 Download this repo.
 
 ```
-git clone https://github.com/maartensap/connotationFramer.git
-cd connotationFramer
+git clone https://github.com/maartensap/riveter-nlp.git
+cd riveter-nlp
 ```
 
 *Note: If installing on a Mac, you will need Xcode installed to run git from the command line.*
@@ -71,7 +71,7 @@ riveter.train(texts,
 persona_score_dict = riveter.get_score_totals()  
 ```
 
-*Note: [Here](https://towardsdatascience.com/get-your-conda-environment-to-show-in-jupyter-notebooks-the-easy-way-17010b76e874) are some instructions for how to run `demo.ipynb` from the connoFramerEnv.*
+*Note: [Here](https://towardsdatascience.com/get-your-conda-environment-to-show-in-jupyter-notebooks-the-easy-way-17010b76e874) are some instructions for how to run `demo.ipynb` from the riveterEnv.*
 
 ### main.py (DEPRECATED)
 To extract connotation frames from the command line, run main.py.
