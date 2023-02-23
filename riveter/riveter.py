@@ -26,7 +26,7 @@ for p, forms in pronoun_map.items():
         pronoun_special_cases[f] = p
 
 
-class ConnoFramer:
+class Riveter:
 
     def __init__(self):
         self.verb_score_dict = {}
