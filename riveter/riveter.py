@@ -38,8 +38,8 @@ def default_dict_int():
         return defaultdict(int)
 
 
-# def default_dict_int_2():
-#         return default_dict_int
+def default_dict_int_2():
+        return defaultdict(default_dict_int)
 
 
 class Riveter:
@@ -55,7 +55,7 @@ class Riveter:
         self.entity_match_count_dict = defaultdict(default_dict_int)
         self.persona_count_dict = defaultdict(int)
         self.people_words = None
-        self.persona_polarity_verb_count_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+        self.persona_polarity_verb_count_dict = defaultdict(default_dict_int_2)
 
         # TODO: this should go into a load() function instead
         if filename:
