@@ -493,7 +493,7 @@ class Riveter:
                 if _agent_score < 0:
                     self.persona_polarity_verb_count_dict[_persona]['negative'][_verb + '_nusbj'] += 1
                 elif _agent_score > 0:
-                    self.persona_polarity_verb_count_dict[_persona]['negative'][_verb + '_nsubj'] += 1
+                    self.persona_polarity_verb_count_dict[_persona]['positive'][_verb + '_nsubj'] += 1
 
         for (_persona, _verb), _count in dobj_verb_count_dict.items():
             if _verb in self.verb_score_dict:
