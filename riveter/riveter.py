@@ -46,7 +46,7 @@ class Riveter:
         self.id_persona_count_dict = None
         self.id_nsubj_verb_count_dict = None
         self.id_dobj_verb_count_dict = None
-        self.id_persona_scored_verb_dict = None
+        self.id_persona_scored_verb_dict = None # the number of scored verbs for each document and persona
         self.entity_match_count_dict = defaultdict(default_dict_int)
         self.persona_count_dict = defaultdict(int)
         self.people_words = None
@@ -59,6 +59,7 @@ class Riveter:
                 if k in self.__dict__.keys():
                     setattr(self, k, getattr(my_riveter, k))
 
+
     def save(self, filename='riveter.pkl'):
         with open(filename, 'wb') as file:
             # for k, v in self.__dict__.items():
@@ -67,6 +68,7 @@ class Riveter:
             pickle.dump(self, file, pickle.HIGHEST_PROTOCOL)
             print(f'Riveter successfully saved to "{filename}"')
  
+
     def load_lexicon(self, label):
         if label in ['power', 'agency']:
             self.load_sap_lexicon(label)
@@ -194,6 +196,84 @@ class Riveter:
         graph.axhline(0, c = "black")
         plt.xticks(rotation=45, ha='right')
         plt.title(title) 
+        plt.tight_layout()
+
+
+    def plot_verbs_for_persona(self, persona):
+
+        persona_verb_count_dict = defaultdict(lambda: defaultdict(int))
+        for _id, _pesrona_scored_verb_dict in self.id_persona_scored_verb_dict.items():
+            for _persona, _scored_verb_dict
+
+
+        # id_persona_scored_verb_dict
+
+        # self.id_nsubj_verb_count_dict = None
+        # self.id_dobj_verb_count_dict = None
+
+        verb_positive_scores_dict = defaultdict(list)
+        verb_negative_scores_dict = defaultdict(list)
+
+        for _dobj_verb_count_dict, _nsubj_verb_count_dict in zip(dobj_verb_count_dicts, nsubj_verb_count_dicts):
+            
+            _dobj_verb_count_dict = dobj_verb_count_dicts[i]
+            
+            _persona_total_dict = defaultdict(int)
+            for (_persona, _verb), _count in _nsubj_verb_count_dict.items():
+                _persona_total_dict[_persona] += _count
+            for (_persona, _verb), _count in _dobj_verb_count_dict.items():
+                _persona_total_dict[_persona] += _count
+                
+            for (_persona, _verb), _count in _nsubj_verb_count_dict.items():
+                if _persona == 'author':
+                    if _verb in verb_power_dict:
+                        _power = verb_power_dict[_verb]  
+                        if _power == 'power_agent':
+                            verb_positive_scores_dict[_verb + '_subj'].append(_count/float(_persona_total_dict[_persona]))
+                        if _power == 'power_theme':
+                            verb_negative_scores_dict[_verb + '_subj'].append(_count/float(_persona_total_dict[_persona]))
+
+            for (_persona, _verb), _count in _dobj_verb_count_dict.items():
+                if _persona == 'author':
+                    if _verb in verb_power_dict:
+                        _power = verb_power_dict[_verb]  
+                        if _power == 'power_theme':
+                            verb_positive_scores_dict[_verb + '_obj'].append(_count/float(_persona_total_dict[_persona]))
+                        if _power == 'power_agent':
+                            verb_negative_scores_dict[_verb + '_obj'].append(_count/float(_persona_total_dict[_persona]))
+
+        verb_positive_mean_dict = {_verb: np.mean(_scores) for _verb, _scores in verb_positive_scores_dict.items()}
+        verb_negative_mean_dict = {_verb: np.mean(_scores) for _verb, _scores in verb_negative_scores_dict.items()}
+
+        verbs_to_plot = []
+        means_to_plot = []
+
+        for _mean, _verb in sorted(((_mean, _verb) for _verb, _mean in verb_positive_mean_dict.items()), reverse=True)[:10]:
+            verbs_to_plot.append(_verb)
+            means_to_plot.append(_mean)
+        for _mean, _verb in sorted(((_mean, _verb) for _verb, _mean in verb_negative_mean_dict.items()), reverse=False)[-10:]:
+            verbs_to_plot.append(_verb)
+            means_to_plot.append(-_mean)
+            
+        df_to_plot = pd.DataFrame({'Mean': means_to_plot},
+                                index=verbs_to_plot)
+
+        sns.set(style='ticks', font_scale=1.5)
+        fig, ax = plt.subplots(1, 1, figsize =(3,8))
+        sns.heatmap(df_to_plot, 
+                    linewidths=1, 
+                    annot_kws={'size': 13},
+                    cmap='PiYG',
+                    center=0,
+                    annot=True,
+                    cbar=False,
+                    vmin=-0.1,
+                    vmax=0.1,
+                    fmt='.4f')
+        ax.set_ylabel('')    
+        ax.set_xlabel('')
+        ax.set_xticks([])
+        plt.title('Author')
         plt.tight_layout()
 
 
