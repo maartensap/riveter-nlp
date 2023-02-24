@@ -262,7 +262,7 @@ class Riveter:
         plt.tight_layout()
 
         if output_path:
-            plt.savefig(output_path)
+            plt.savefig(output_path, bbox_inches='tight')
 
 
     # TODO: this would be helpful for debugging and result inspection
