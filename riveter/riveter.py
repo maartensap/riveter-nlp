@@ -33,8 +33,13 @@ for p, forms in pronoun_map.items():
     for f in forms:
         pronoun_special_cases[f] = p
 
+
 def default_dict_int():
         return defaultdict(int)
+
+
+# def default_dict_int_2():
+#         return default_dict_int
 
 
 class Riveter:
@@ -50,6 +55,7 @@ class Riveter:
         self.entity_match_count_dict = defaultdict(default_dict_int)
         self.persona_count_dict = defaultdict(int)
         self.people_words = None
+        self.persona_polarity_verb_count_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 
         # TODO: this should go into a load() function instead
         if filename:
@@ -200,6 +206,65 @@ class Riveter:
         plt.tight_layout()
 
 
+    
+    def get_persona_polarity_verb_count_dict(self):
+        return dict(self.persona_polarity_verb_count_dict)
+
+
+    def plot_verbs_for_persona(self, persona, figsize=None, output_path=None):
+
+        verbs_to_plot = []
+        counts_to_plot = []
+
+        persona_polarity_verb_count_dict = self.persona_polarity_verb_count_dict
+
+        polarity_verb_count_dict = persona_polarity_verb_count_dict[persona]
+
+        max_count = 0
+        min_count = 0
+
+        for _count, _verb in sorted(((_count, _verb) for _verb, _count in polarity_verb_count_dict['positive'].items()), reverse=True)[:10]:
+            verbs_to_plot.append(_verb)
+            counts_to_plot.append(_count)
+            if _count > max_count:
+                max_count = _count
+        for _count, _verb in sorted(((_count, _verb) for _verb, _count in polarity_verb_count_dict['negative'].items()), reverse=False)[-10:]:
+            verbs_to_plot.append(_verb)
+            counts_to_plot.append(-_count)
+            if -_count < min_count:
+                min_count = -_count
+            
+        df_to_plot = pd.DataFrame({'Count': counts_to_plot},
+                                index=verbs_to_plot)
+
+        sns.set(style='ticks', font_scale=1.1)
+        if not figsize:
+            fig, ax = plt.subplots(1, 1)
+        else:
+            fig, ax = plt.subplots(1, 1, figsize=figsize)
+        sns.heatmap(df_to_plot, 
+                    linewidths=1, 
+                    annot_kws={'size': 13},
+                    cmap='PiYG',
+                    # cmap=sns.diverging_palette(0, 255, sep=77, as_cmap=True),
+                    center=0,
+                    annot=True,
+                    cbar=False,
+                    vmin=min_count,
+                    vmax=max_count,
+                    # fmt='.4f',
+                    square=True)
+        ax.set_ylabel('')    
+        ax.set_xlabel('')
+        ax.set_xticks([])
+        plt.yticks(rotation=0) 
+        plt.title(persona)
+        plt.tight_layout()
+
+        if output_path:
+            plt.savefig(output_path)
+
+
     # TODO: this would be helpful for debugging and result inspection
     # def get_docs_for_persona(self, persona):
 
@@ -211,8 +276,10 @@ class Riveter:
     def count_personas_for_doc(self, doc_id):
         return dict(self.id_persona_count_dict[doc_id])
     
+
     def count_scored_verbs_for_doc(self, doc_id):
         return dict(self.id_persona_scored_verb_dict[doc_id])
+
 
     def count_nsubj_for_doc(self, doc_id, matched_only=False):
         """Returns the set of persona-verb pairs (where persona is the subject of the verb)
@@ -222,6 +289,7 @@ class Riveter:
         if matched_only:
             counts = {pair: cnt for pair,cnt in counts.items() if pair[1] in self.verb_score_dict}
         return counts
+
 
     def count_dobj_for_doc(self, doc_id,matched_only=False):
         """Returns the set of persona-verb pairs (where persona is the object of the verb)
@@ -248,11 +316,13 @@ class Riveter:
         clusters = spacyDoc._.coref_clusters
         return clusters
 
+
     def __isSpanPerson(self,span,peopleWords):     
         isPerson = len(span.ents) > 0
         isPerson = isPerson and any([e.label_ in NER_TAGS for e in span.ents])
         isPerson = isPerson or any([w.text.lower()==p.lower() for w in span for p in peopleWords])
         return isPerson
+
 
     def __isClusterPerson(self,cluster,peopleWords):
         areMentionsPeople = [self.__isSpanPerson(m,peopleWords) for m in cluster.mentions]
@@ -263,6 +333,7 @@ class Riveter:
         pctMentionsPeople = sum(areMentionsPeople) / len(areMentionsPeople)
         return pctMentionsPeople >=.5
     
+
     def __getPeopleClusters(self, spacyDoc, peopleWords):
 
         clusters = self.__getCorefClusters(spacyDoc)
@@ -419,12 +490,20 @@ class Riveter:
                 persona_scored_verbs_dict[_persona] += 1
                 _agent_score = self.verb_score_dict[_verb]['agent']
                 persona_score_dict[_persona] += (_count*_agent_score)
+                if _agent_score < 0:
+                    self.persona_polarity_verb_count_dict[_persona]['negative'][_verb + '_nusbj'] += 1
+                elif _agent_score > 0:
+                    self.persona_polarity_verb_count_dict[_persona]['negative'][_verb + '_nsubj'] += 1
 
         for (_persona, _verb), _count in dobj_verb_count_dict.items():
             if _verb in self.verb_score_dict:
                 persona_scored_verbs_dict[_persona] += 1
                 _theme_score = self.verb_score_dict[_verb]['theme']
                 persona_score_dict[_persona] += (_count*_theme_score)
+                if _theme_score < 0:
+                    self.persona_polarity_verb_count_dict[_persona]['negative'][_verb + '_dobj'] += 1
+                elif _theme_score > 0:
+                    self.persona_polarity_verb_count_dict[_persona]['positive'][_verb + '_dobj'] += 1
 
         # persona_score_dict = {p: s/float(persona_count_dict[p]) for p, s in persona_score_dict.items()} # do this later instead
 
@@ -437,7 +516,6 @@ class Riveter:
         return persona_score_dict, persona_scored_verbs_dict
 
 
-    
     def __score_dataset(self, texts, text_ids, persona_patterns_dict):
 
         id_nsubj_verb_count_dict = {}

@@ -903,7 +903,6 @@ harm,agency_pos,power_agent
 hate,agency_neg,power_theme
 haul,agency_pos,power_equal
 haunt,agency_neg,power_agent
-have,agency_neg,power_agent
 head,agency_pos,
 heal,agency_pos,power_agent
 heap,agency_pos,power_agent
