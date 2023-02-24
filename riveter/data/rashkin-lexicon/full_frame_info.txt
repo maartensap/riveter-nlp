@@ -1,4 +1,4 @@
-verb	perspective(wo)	perspective(ws)	perspective(so)	effect(o)	effect(s)	value(o)	value(s)	state(o)	state(s)	perspective(ro)	perspective(rs)	perspective(os)
+verb	writer_perspective(t)	writer_perspective(a)	agent_theme_perspective(t)	effect(t)	effect(a)	value(t)	value(a)	state(t)	state(a)	reader_perspective(t)	reader_perspective(a)	theme_agent_perspective(a)
 have	0.366666666667	0.333333333333	0.466666666667	0.0666666666667	0.2	0.466666666667	0.6	0.0666666666667	0.366666666667	0.4	0.366666666667	0.0666666666667
 say	0.0	0.166666666667	0.0666666666667	0.133333333333	0.0666666666667	0.0666666666667	1.0	0.0	0.1	0.0333333333333	0.266666666667	0.0
 make	-0.0666666666667	0.1	0.1	0.466666666667	-0.0666666666667	0.2	1.0	0.0	0.166666666667	-0.0333333333333	0.2	0.0

@@ -76,23 +76,25 @@ class Riveter:
 
     def load_rashkin_lexicon(self, label='effect'):
         """
-        label can be any of [effect, state, value, perspective]
+        label can be any of [effect, state, value, writer_perspective, reader_perspective, agent_theme_perspective, theme_agent_perspective].
+        Note: the persp
         """
 
-        lexicon_df = pd.read_csv(os.path.join(basepath,'data/rashkin-lexicon/full_frame_info.txt', sep='\t'))
+        from IPython import embed        
+        lexicon_df = pd.read_csv(os.path.join(basepath,'data/rashkin-lexicon/full_frame_info.txt'), sep='\t')
 
         verb_score_dict = defaultdict(default_dict_int)
         for i, _row in lexicon_df.iterrows():
 
             _lemma  = _row['verb'].strip()
-
+            
             _score_dict = {'agent': 0, 'theme': 0}
-
-            _score_dict['agent'] += _row[label + '(s)'] # TODO: Should the Rashkin scores be converted to [-1, 0, 1]?
-            _score_dict['theme'] += _row[label + '(o)']
+            
+            _score_dict['agent'] += _row.get(label + '(a)',0) # TODO: Should the Rashkin scores be converted to [-1, 0, 1]?
+            _score_dict['theme'] += _row.get(label + '(t)',0)
 
             verb_score_dict[_lemma] = _score_dict
-
+        
         self.verb_score_dict = verb_score_dict
 
 
