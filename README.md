@@ -68,7 +68,7 @@ python -m spacy download en_core_web_sm
 
 ### riveter.py
 
-To run `riveter.py`, see the example in [our demo notebook](https://github.com/maartensap/riveter-nlp/blob/main/riveter/demo.ipynb).
+To run `riveter.py`, see the examples in [our demo notebook](https://github.com/maartensap/riveter-nlp/blob/main/riveter/demo.ipynb). This notebook includes both toy and realistic examples and all of the most important function calls.
 
 ```python
 riveter = Riveter()  
