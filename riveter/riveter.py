@@ -20,18 +20,17 @@ nlp.add_pipe(neuralcoref.NeuralCoref(nlp.vocab,blacklist=False),name="neuralcore
 NER_TAGS = ["PERSON"]
 
 PRONOUNS = ['he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'they', 'them', 'their', 'themselves']
-basepath = os.path.dirname(__file__)
+BASEPATH = os.path.dirname(__file__)
 
-# This is messy, but I think special-casing pronouns is probably the right thing to do
-pronoun_map = {
+PRONOUN_MAP = {
     "i": ["me", "my", "mine"],
     "we": ["us", "ours", "our"],
     "you": ["yours"]
 }
-pronoun_special_cases = {}
-for p, forms in pronoun_map.items():
+PRONOUN_SPECIAL_CASES = {}
+for p, forms in PRONOUN_MAP.items():
     for f in forms:
-        pronoun_special_cases[f] = p
+        PRONOUN_SPECIAL_CASES[f] = p
 
 
 def default_dict_int():
@@ -92,7 +91,7 @@ class Riveter:
         """
 
         from IPython import embed
-        lexicon_df = pd.read_csv(os.path.join(basepath,'data/rashkin-lexicon/full_frame_info.txt'), sep='\t')
+        lexicon_df = pd.read_csv(os.path.join(BASEPATH, 'data/rashkin-lexicon/full_frame_info.txt'), sep='\t')
 
         verb_score_dict = defaultdict(default_dict_int)
         for i, _row in lexicon_df.iterrows():
@@ -118,7 +117,7 @@ class Riveter:
                       'agency_neg':   {'agent': -1, 'theme': 0},
                       'agency_equal': {'agent': 0, 'theme': 0}}
 
-        lexicon_df = pd.read_csv(os.path.join(basepath,'data/sap-lexicon/agency_power.csv'))
+        lexicon_df = pd.read_csv(os.path.join(BASEPATH, 'data/sap-lexicon/agency_power.csv'))
 
         verb_score_dict = defaultdict(default_dict_int)
         for i, _row in lexicon_df.iterrows():
@@ -131,7 +130,7 @@ class Riveter:
 
     def set_people_words(self, people_words=[], load_default=False):
         if len(people_words) == 0 and load_default:
-            with open(os.path.join(basepath,'data/generic_people.txt')) as f:
+            with open(os.path.join(BASEPATH, 'data/generic_people.txt')) as f:
                 self.people_words = f.read().splitlines()
         else:
             self.people_words = people_words
@@ -198,7 +197,9 @@ class Riveter:
 
 
     def get_scores_for_doc(self, doc_id, frequency_threshold=0):
-        return {p: s/float(self.id_persona_count_dict[doc_id][p]) for p, s in self.id_persona_score_dict[doc_id].items() if self.persona_count_dict[p] >= frequency_threshold}
+        return {p: s/float(self.id_persona_count_dict[doc_id][p]) 
+                for p, s in self.id_persona_score_dict[doc_id].items() 
+                if self.persona_count_dict[p] >= frequency_threshold}
 
 
     def plot_scores_for_doc(self, doc_id, number_of_scores = 10, title = "Personas by Score", frequency_threshold=0):
@@ -442,7 +443,7 @@ class Riveter:
                 for _span in _cluster:
 
                     _cluster_text = str(_cluster.main).lower()
-                    _cluster_text = pronoun_special_cases.get(_cluster_text, _cluster_text)
+                    _cluster_text = PRONOUN_SPECIAL_CASES.get(_cluster_text, _cluster_text)
 
                     self.persona_count_dict[_cluster_text] += 1
                     self.entity_match_count_dict[_cluster_text][str(_span).lower()] += 1
@@ -525,14 +526,6 @@ class Riveter:
                     self.persona_polarity_verb_count_dict[_persona]['negative'][_verb + '_dobj'] += 1
                 elif _theme_score > 0:
                     self.persona_polarity_verb_count_dict[_persona]['positive'][_verb + '_dobj'] += 1
-
-        # persona_score_dict = {p: s/float(persona_count_dict[p]) for p, s in persona_score_dict.items()} # do this later instead
-
-        # FOR DEBUGGING
-        # print('nsubj_verb_count_dict', nsubj_verb_count_dict)
-        # print('dobj_verb_count_dict', dobj_verb_count_dict)
-        # print('persona_count_dict', persona_count_dict)
-        # print('persona_score_dict', persona_score_dict)
 
         return persona_score_dict, persona_scored_verbs_dict
 
