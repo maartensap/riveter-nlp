@@ -106,3 +106,15 @@ Create a bar ploto showing the final scores across the dataset.
 | `frequency_threshold` | integer | Optional: Entities must be matched to at least this many verbs to appear in the output. |
 
 <br>
+
+#### `get_scores_for_doc(doc_id, frequency_threshold=0)`
+
+Get the final scores for all the entities, above some frequency threshold in a single document.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| `doc_id` | string or integer | Show results for this document ID. |
+| `frequency_threshold` | integer | Optional: Entities must be matched to at least this many verbs to appear in the output. |
+| RETURNS | dictionary | Nested dictionary of document IDs, entities, and their total scores. |
+
+<br>
