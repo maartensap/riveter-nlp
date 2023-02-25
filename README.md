@@ -86,11 +86,23 @@ persona_score_dict = riveter.get_score_totals()
         
 #### `get_score_totals(frequency_threshold=0)`
 
-Get the final scores for all the entities, above some frequency threshold.
+Get the final scores for all the entities, above some frequency threshold across the dataset.
 
 | Name               | Type              | Description                      |
 | ------------------ | ----------------- | -------------------------------- |
 | `frequency_threshold` | integer | Optional: Entities must be matched to at least this many verbs to appear in the output. |
 | RETURNS | dictionary | Dictionary of entities and their total scores. |
+
+<br>
+
+#### `plot_scores(number_of_scores=10, title="Personas by Score", frequency_threshold=0)`
+
+Create a bar ploto showing the final scores across the dataset.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| `number_of_scores` | integer | Optional: Show only the top or bottom number of scores. |
+| `title` | string | Optional: Plot title. |
+| `frequency_threshold` | integer | Optional: Entities must be matched to at least this many verbs to appear in the output. |
 
 <br>
