@@ -10,9 +10,11 @@ The name Riveter is inspired by ["Rosie the Riveter,"](https://en.wikipedia.org/
 
 <br>
 
-## Demo video
+## Demo video and notebook
 
-Watch our two minute demo video here: [https://youtu.be/Uftyd8eCmFw](https://youtu.be/Uftyd8eCmFw)
+Watch our two minute demo video here: [link](https://youtu.be/Uftyd8eCmFw)
+
+Check out our demo notebook here: [link](https://github.com/maartensap/riveter-nlp/blob/main/riveter/demo.ipynb)
 
 <br>
 
