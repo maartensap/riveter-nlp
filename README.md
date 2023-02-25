@@ -198,7 +198,7 @@ Get the noun subject counts for a single document.
 
 <br>
 
-#### `count_dobj_for_doc(self, doc_id,matched_only=False)`
+#### `count_dobj_for_doc(doc_id,matched_only=False)`
 
 Get the direct object counts for a single document.
 
@@ -210,3 +210,13 @@ Get the direct object counts for a single document.
 
 <br>
 
+#### `get_persona_cluster(persona)`
+
+Get the full entity cluster from `neuralcoref`.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| persona | string | Show results for this entity. |
+| RETURNS | dictionary | Dictionary of the main entity string and all of its string matches. |
+
+<br>
