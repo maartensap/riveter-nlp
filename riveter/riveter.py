@@ -45,6 +45,7 @@ def default_dict_int_2():
 class Riveter:
 
     def __init__(self, filename=None):
+        self.texts = None
         self.verb_score_dict = None
         self.persona_score_dict = None
         self.id_persona_score_dict = None
@@ -141,6 +142,23 @@ class Riveter:
 
 
     def train(self, texts, text_ids, persona_patterns_dict=None):
+
+        # Hacky solution to force refresh when calling train() again
+        if self.texts:
+            self.texts = None
+            # self.verb_score_dict = None   # not this one, this is loaded on initalizing the Riveter object
+            self.persona_score_dict = None
+            self.id_persona_score_dict = None
+            self.id_persona_count_dict = None
+            self.id_nsubj_verb_count_dict = None
+            self.id_dobj_verb_count_dict = None
+            self.id_persona_scored_verb_dict = None # the number of scored verbs for each document and persona
+            self.entity_match_count_dict = defaultdict(default_dict_int)
+            self.persona_count_dict = defaultdict(int)
+            self.persona_match_count_dict = defaultdict(int)
+            self.people_words = None
+            self.persona_polarity_verb_count_dict = defaultdict(default_dict_int_2)
+
         self.texts = texts
         self.text_ids = text_ids
         self.persona_score_dict, \
