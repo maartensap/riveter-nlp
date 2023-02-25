@@ -118,3 +118,16 @@ Get the final scores for all the entities, above some frequency threshold in a s
 | RETURNS | dictionary | Nested dictionary of document IDs, entities, and their total scores. |
 
 <br>
+
+#### `plot_scores_for_doc(doc_id, number_of_scores=10, title="Personas by Score", frequency_threshold=0)`
+
+Create a bar ploto showing the final scores across the dataset.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| `doc_id` | string or integer | Show results for this document ID. |
+| `number_of_scores` | integer | Optional: Show only the top or bottom number of scores. |
+| `title` | string | Optional: Plot title. |
+| `frequency_threshold` | integer | Optional: Entities must be matched to at least this many verbs to appear in the output. |
+
+<br>
