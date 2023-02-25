@@ -178,14 +178,14 @@ class Riveter:
         plt.tight_layout()
 
 
-    def get_scores_for_doc(self, doc_id, frequency_threshold):
+    def get_scores_for_doc(self, doc_id, frequency_threshold=0):
         return {p: s/float(self.id_persona_count_dict[doc_id][p]) for p, s in self.id_persona_score_dict[doc_id].items() if self.persona_count_dict[p] >= frequency_threshold}
 
 
     def plot_scores_for_doc(self, doc_id, number_of_scores = 10, title = "Personas by Score", frequency_threshold=0):
 
     # Make scores dict into dataframe
-        _normalized_dict =  self.get_scores_for_doc(doc_id, frequency_threshold)
+        _normalized_dict =  self.get_scores_for_doc(doc_id, frequency_threshold=0)
         df = pd.DataFrame(_normalized_dict.items(), columns = ["persona", "score"])
         df = df.sort_values(by = "score", ascending = False)
 
