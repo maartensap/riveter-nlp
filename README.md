@@ -173,6 +173,8 @@ Get the entity counts for a single document.
 | doc_id | string or integer | Show results for this document ID |
 | RETURNS | dictionary | Dictionary of entities and integer counts. |
 
+<br>
+
 #### `count_scored_verbs_for_doc(doc_id)`
 
 Get the verb counts (verbs that were matched to the lexicon) for a single document.
@@ -183,3 +185,28 @@ Get the verb counts (verbs that were matched to the lexicon) for a single docume
 | RETURNS | dictionary | Dictionary of verbs and integer counts. |
 
 <br>
+
+#### `count_nsubj_for_doc(doc_id, matched_only=False)`
+
+Get the noun subject counts for a single document.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| doc_id | string or integer | Show results for this document ID |
+| matched_only | boolean | If true, return only the subjects that were matched to identified entities. |
+| RETURNS | dictionary | Dictionary of noun subjects and integer counts. |
+
+<br>
+
+#### `count_dobj_for_doc(self, doc_id,matched_only=False)`
+
+Get the direct object counts for a single document.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| doc_id | string or integer | Show results for this document ID |
+| matched_only | boolean | If true, return only the direct objects that were matched to identified entities. |
+| RETURNS | dictionary | Dictionary of direct object and integer counts. |
+
+<br>
+
