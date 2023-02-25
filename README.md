@@ -70,6 +70,7 @@ To use Riveter 💪, see the examples in [our demo notebook](https://github.com/
 
 This notebook includes both toy and realistic examples and all of the most important function calls.
 
+If you want a quick start:
 ```python
 riveter = Riveter()  
 riveter.load_sap_lexicon('power')
