@@ -227,6 +227,6 @@ Get the full entity cluster from `neuralcoref`.
 
 ## Authorship and Citation
 
-This package was created by an interdiscplinary team including [Maria Antoniak](https://maria-antoniak.github.io/), [Anjalie Field](https://anjalief.github.io/), Ji Min Mun, [Melanie Walsh](https://melaniewalsh.org/), [Lauren F. Klein](https://lklein.com/), and [Maarten Sap](https://maartensap.com/).
+This package was created by an interdiscplinary team including [Maria Antoniak](https://maria-antoniak.github.io/), [Anjalie Field](https://anjalief.github.io/), Jimin Mun, [Melanie Walsh](https://melaniewalsh.org/), [Lauren F. Klein](https://lklein.com/), and [Maarten Sap](https://maartensap.com/).
 
 <br>
