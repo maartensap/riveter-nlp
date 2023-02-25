@@ -222,3 +222,9 @@ Get the full entity cluster from `neuralcoref`.
 | RETURNS | dictionary | Dictionary of the main entity string and all of its string matches. |
 
 <br>
+
+## Authorship and Citation
+
+This package was created by an interdiscplinary team including [Maria Antoniak](https://maria-antoniak.github.io/), [Anjalie Field](https://anjalief.github.io/), Ji Min Mun, [Melanie Walsh](https://melaniewalsh.org/), [Lauren F. Klein](https://lklein.com/), and [Maarten Sap](https://maartensap.com/).
+
+<br>
