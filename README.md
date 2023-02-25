@@ -131,3 +131,13 @@ Create a bar ploto showing the final scores across the dataset.
 | `frequency_threshold` | integer | Optional: Entities must be matched to at least this many verbs to appear in the output. |
 
 <br>
+
+#### `get_persona_polarity_verb_count_dict()`
+
+Gets all the verbs, their frequencies, and whether they contributed positively or negatively to the final scores for every entity. Computed across the whole dataset.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| RETURNS | dictionary | Nested dictionary of entities, positive or negative contribution, verbs, and counts. |
+
+<br>
