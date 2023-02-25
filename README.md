@@ -22,14 +22,14 @@ Requirements
 - Python 3.8
 - numpy
 - pandas
-- spaCy 2.3.9
 - neuralcoref
+- spaCy 2.3.9 (this is required for neuralcoref)
 - seaborn
 - matplotlib
 
-### Example installation instructions
+### Installation instructions
 
-We recommend creating a new virtual environment. Activate this environment before installing and before running the code.
+We strongly recommend creating a new virtual environment. Activate this environment before installing and before running the code.
 
 ```bash
 conda create -n riveterEnv python=3.8
