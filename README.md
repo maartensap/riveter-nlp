@@ -153,3 +153,33 @@ Create a heatmap showing the verb counts for a single persona.
 | `output_path` | string | Optional: Where to save the plot as a file. |
 
 <br>
+
+#### `get_persona_counts()`
+
+Get the total counts for the entities (all entity matches, whether or not they were matched to a lexicon verb).
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| RETURNS | dictionary | Dictionary of entities and integer counts. |
+
+<br>
+
+#### `count_personas_for_doc(doc_id)`
+
+Get the entity counts for a single document.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| doc_id | string or integer | Show results for this document ID |
+| RETURNS | dictionary | Dictionary of entities and integer counts. |
+
+#### `count_scored_verbs_for_doc(doc_id)`
+
+Get the verb counts (verbs that were matched to the lexicon) for a single document.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| doc_id | string or integer | Show results for this document ID |
+| RETURNS | dictionary | Dictionary of verbs and integer counts. |
+
+<br>
