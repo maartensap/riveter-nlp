@@ -97,7 +97,7 @@ Get the final scores for all the entities, above some frequency threshold across
 
 #### `plot_scores(number_of_scores=10, title="Personas by Score", frequency_threshold=0)`
 
-Create a bar ploto showing the final scores across the dataset.
+Create a bar plot showing the final scores across the dataset.
 
 | Name               | Type              | Description                      |
 | ------------------ | ----------------- | -------------------------------- |
@@ -121,7 +121,7 @@ Get the final scores for all the entities, above some frequency threshold in a s
 
 #### `plot_scores_for_doc(doc_id, number_of_scores=10, title="Personas by Score", frequency_threshold=0)`
 
-Create a bar ploto showing the final scores across the dataset.
+Create a bar plot showing the final scores for a single document.
 
 | Name               | Type              | Description                      |
 | ------------------ | ----------------- | -------------------------------- |
@@ -139,5 +139,17 @@ Gets all the verbs, their frequencies, and whether they contributed positively o
 | Name               | Type              | Description                      |
 | ------------------ | ----------------- | -------------------------------- |
 | RETURNS | dictionary | Nested dictionary of entities, positive or negative contribution, verbs, and counts. |
+
+<br>
+
+#### `plot_verbs_for_persona(persona, figsize=None, output_path=None)`
+
+Create a heatmap showing the verb counts for a single persona.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| `persona` | string | The entity whose results will be shown in the plot. |
+| `figsize` | tuple | Optional: Figure dimensions, e.g. (2, 4). |
+| `output_path` | string | Optional: Where to save the plot as a file. |
 
 <br>
