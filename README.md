@@ -10,6 +10,12 @@ The name Riveter is inspired by ["Rosie the Riveter,"](https://en.wikipedia.org/
 
 <br>
 
+## Demo video
+
+Watch our two minute demo video here: [https://youtu.be/Uftyd8eCmFw](https://youtu.be/Uftyd8eCmFw)
+
+<br>
+
 ## Installation
 
 Requirements 
@@ -72,18 +78,4 @@ persona_score_dict = riveter.get_score_totals()
 ```
 
 *Note: [Here](https://towardsdatascience.com/get-your-conda-environment-to-show-in-jupyter-notebooks-the-easy-way-17010b76e874) are some instructions for how to run `demo.ipynb` from the riveterEnv.*
-
-### main.py (DEPRECATED)
-To extract connotation frames from the command line, run main.py.
-
-Command to run main.py: `python3 main.py --input_file fakeStories.csv`
-
-Replace `fakeStories.csv` with any .csv input file, formatted as follows:
-
-| text_id | text |
-| ------- | ---- |
-| 1			| This is a sample line of text. |
-| 2 		| This is another line of text. It can be more than one sentence. |
-
-*Note that each text_id should be unique, but can have any value.* 
 
