@@ -79,3 +79,18 @@ persona_score_dict = riveter.get_score_totals()
 
 *Note: [Here](https://towardsdatascience.com/get-your-conda-environment-to-show-in-jupyter-notebooks-the-easy-way-17010b76e874) are some instructions for how to run `demo.ipynb` from the riveterEnv.*
 
+<br>
+
+## Documentation
+
+        
+#### `get_score_totals(frequency_threshold=0)`
+
+Displays basic statistics about the training dataset.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| `frequency_threshold` | integer | Optional: Documents that will be used to train the topic model. |
+| RETURNS | dictionary | Dictionary of entities and their total scores. |
+
+<br>
