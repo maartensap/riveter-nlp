@@ -62,7 +62,7 @@ class Riveter:
         if filename:
             with open(filename, 'rb') as f:
                 my_riveter = pickle.load(f)
-            
+
             for k in my_riveter.__dict__.keys():
                 if k in self.__dict__.keys():
                     setattr(self, k, getattr(my_riveter, k))
@@ -75,7 +75,7 @@ class Riveter:
             #         setattr(self, k, dict(v))
             pickle.dump(self, file, pickle.HIGHEST_PROTOCOL)
             print(f'Riveter successfully saved to "{filename}"')
- 
+
 
     def load_lexicon(self, label):
         if label in ['power', 'agency']:
@@ -90,27 +90,27 @@ class Riveter:
         Note: the persp
         """
 
-        from IPython import embed        
+        from IPython import embed
         lexicon_df = pd.read_csv(os.path.join(basepath,'data/rashkin-lexicon/full_frame_info.txt'), sep='\t')
 
         verb_score_dict = defaultdict(default_dict_int)
         for i, _row in lexicon_df.iterrows():
 
             _lemma  = _row['verb'].strip()
-            
+
             _score_dict = {'agent': 0, 'theme': 0}
-            
+
             _score_dict['agent'] += _row.get(label + '(a)',0) # TODO: Should the Rashkin scores be converted to [-1, 0, 1]?
             _score_dict['theme'] += _row.get(label + '(t)',0)
 
             verb_score_dict[_lemma] = _score_dict
-        
+
         self.verb_score_dict = verb_score_dict
 
 
     def load_sap_lexicon(self, label_column):
 
-        label_dict = {'power_agent':  {'agent': 1, 'theme': -1}, 
+        label_dict = {'power_agent':  {'agent': 1, 'theme': -1},
                       'power_theme':  {'agent': -1, 'theme': 1},
                       'power_equal':  {'agent': 0, 'theme': 0},
                       'agency_pos':   {'agent': 1, 'theme': 0},
@@ -124,7 +124,7 @@ class Riveter:
             if not pd.isnull(_row[label_column]):
                 _lemma  = _row['verb'].strip()
                 verb_score_dict[_lemma] = label_dict[_row[label_column]]
-        
+
         self.verb_score_dict = verb_score_dict
 
 
@@ -156,7 +156,7 @@ class Riveter:
     
 
     def plot_scores(self, number_of_scores = 10, title = "Personas by Score", frequency_threshold=0):
-        
+
         # Make scores dict into dataframe
         _normalized_dict = self.get_score_totals(frequency_threshold)
         df = pd.DataFrame(_normalized_dict.items(), columns = ["persona", "score"])
@@ -166,27 +166,27 @@ class Riveter:
         if number_of_scores < 0:
             df = df[number_of_scores:]
             df = df.sort_values(by = "score", ascending = True)
-            
+
         # If user asks for top x scores, e.g. 10
         else:
             df = df[:number_of_scores]
-        
-        # Make bar plot with line at 0 
+
+        # Make bar plot with line at 0
         graph = sns.barplot(data= df, x="persona", y="score", color = "skyblue")
         graph.axhline(0, c = "black")
         plt.xticks(rotation=45, ha='right')
-        plt.title(title) 
+        plt.title(title)
         plt.tight_layout()
 
 
-    def get_scores_for_doc(self, doc_id):
-        return {p: s/float(self.id_persona_count_dict[doc_id][p]) for p, s in self.id_persona_score_dict[doc_id].items()}
-    
+    def get_scores_for_doc(self, doc_id, frequency_threshold=0):
+        return {p: s/float(self.id_persona_count_dict[doc_id][p]) for p, s in self.id_persona_score_dict[doc_id].items() if self.persona_count_dict[p] >= frequency_threshold}
 
-    def plot_scores_for_doc(self, doc_id, number_of_scores = 10, title = "Personas by Score"):
-        
-        # Make scores dict into dataframe
-        _normalized_dict =  self.get_scores_for_doc(doc_id)
+
+    def plot_scores_for_doc(self, doc_id, number_of_scores = 10, title = "Personas by Score", frequency_threshold=0):
+
+    # Make scores dict into dataframe
+        _normalized_dict =  self.get_scores_for_doc(doc_id, frequency_threshold=0)
         df = pd.DataFrame(_normalized_dict.items(), columns = ["persona", "score"])
         df = df.sort_values(by = "score", ascending = False)
 
@@ -194,20 +194,20 @@ class Riveter:
         if number_of_scores < 0:
             df = df[number_of_scores:]
             df = df.sort_values(by = "score", ascending = True)
-            
+
         # If user asks for top x scores, eg. 10
         else:
             df = df[:number_of_scores]
-        
-        # Make bar plot with line at 0 
+
+        # Make bar plot with line at 0
         graph = sns.barplot(data= df, x="persona", y="score", color = "skyblue")
         graph.axhline(0, c = "black")
         plt.xticks(rotation=45, ha='right')
-        plt.title(title) 
+        plt.title(title)
         plt.tight_layout()
 
 
-    
+
     def get_persona_polarity_verb_count_dict(self):
         return dict(self.persona_polarity_verb_count_dict)
 
@@ -234,7 +234,7 @@ class Riveter:
             counts_to_plot.append(-_count)
             if -_count < min_count:
                 min_count = -_count
-            
+
         df_to_plot = pd.DataFrame({'Count': counts_to_plot},
                                 index=verbs_to_plot)
 
@@ -243,8 +243,8 @@ class Riveter:
             fig, ax = plt.subplots(1, 1)
         else:
             fig, ax = plt.subplots(1, 1, figsize=figsize)
-        sns.heatmap(df_to_plot, 
-                    linewidths=1, 
+        sns.heatmap(df_to_plot,
+                    linewidths=1,
                     annot_kws={'size': 13},
                     cmap='PiYG',
                     # cmap=sns.diverging_palette(0, 255, sep=77, as_cmap=True),
@@ -255,10 +255,10 @@ class Riveter:
                     vmax=max_count,
                     # fmt='.4f',
                     square=True)
-        ax.set_ylabel('')    
+        ax.set_ylabel('')
         ax.set_xlabel('')
         ax.set_xticks([])
-        plt.yticks(rotation=0) 
+        plt.yticks(rotation=0)
         plt.title(persona)
         plt.tight_layout()
 
@@ -276,7 +276,7 @@ class Riveter:
 
     def count_personas_for_doc(self, doc_id):
         return dict(self.id_persona_count_dict[doc_id])
-    
+
 
     def count_scored_verbs_for_doc(self, doc_id):
         return dict(self.id_persona_scored_verb_dict[doc_id])
@@ -300,10 +300,10 @@ class Riveter:
         if matched_only:
             counts = {pair: cnt for pair,cnt in counts.items() if pair[1] in self.verb_score_dict}
         return counts
-    
-    
+
+
     def get_persona_cluster(self, persona):
-        return dict(self.entity_match_count_dict[persona.lower()]) # TODO: possibly shouldn't lower case here? 
+        return dict(self.entity_match_count_dict[persona.lower()]) # TODO: possibly shouldn't lower case here?
                                                                    #       is it possible to have multiple entities whose only difference is capitalization?
 
 
@@ -318,7 +318,7 @@ class Riveter:
         return clusters
 
 
-    def __isSpanPerson(self,span,peopleWords):     
+    def __isSpanPerson(self,span,peopleWords):
         isPerson = len(span.ents) > 0
         isPerson = isPerson and any([e.label_ in NER_TAGS for e in span.ents])
         isPerson = isPerson or any([w.text.lower()==p.lower() for w in span for p in peopleWords])
@@ -327,21 +327,21 @@ class Riveter:
 
     def __isClusterPerson(self,cluster,peopleWords):
         areMentionsPeople = [self.__isSpanPerson(m,peopleWords) for m in cluster.mentions]
-        
+
         if all(areMentionsPeople):
             return True
-        
+
         pctMentionsPeople = sum(areMentionsPeople) / len(areMentionsPeople)
         return pctMentionsPeople >=.5
-    
+
 
     def __getPeopleClusters(self, spacyDoc, peopleWords):
 
         clusters = self.__getCorefClusters(spacyDoc)
-        
-        # need to add singleton clusters for tokens detected as people 
+
+        # need to add singleton clusters for tokens detected as people
         singletons = {}
-        
+
         peopleClusters = set()
         # adding I / you clusters to people
         main2cluster = {c.main.text: c for c in clusters}
@@ -357,22 +357,22 @@ class Riveter:
             isPerson = self.__isSpanPerson(span,peopleWords)
             # isPerson2 = len(span.ents) > 0 and any([e.label_ in NER_TAGS for e in span.ents])
             # isPerson2 = isPerson2 or any([w.text.lower()==p.lower() for w in span for p in peopleWords])
-            
+
             if isPerson:
-        
+
                 # check if it's in the clusters to add people
                 inClusterAlready = False
                 for c in clusters:
                     if any([m.start == span.start and m.end == span.end for m in c.mentions]):
-                        #print("Yes", c)      
+                        #print("Yes", c)
                         peopleClusters.add(c)
                         inClusterAlready = True
-                
+
                 # also add singletons, which may be real singletons or mis-matched ones
                 if not inClusterAlready:
                     # simple heuristic to fix coref bug:
                     # if the span text is the exact same as the main cluster mention, merge
-                    
+
                     matched = [c for c in peopleClusters if c.main.text == span.text]
                     if len(matched) > 0:
                         matched = matched[0]
@@ -397,12 +397,12 @@ class Riveter:
         newPeopleClusters = [c for c in newPeopleClusters if self.__isClusterPerson(c,peopleWords)]
 
         return newPeopleClusters
-    
+
 
     def __parse_and_extract_coref(self, text):
         # todo possibly: keep track of each spacy.Token / Span and return those along with the str representation, so
         # that we can use that info later to visualize the lexicon output
-        
+
         nsubj_verb_count_dict = defaultdict(int)
         dobj_verb_count_dict = defaultdict(int)
 
@@ -428,17 +428,17 @@ class Riveter:
 
                     self.persona_count_dict[_cluster_text] += 1
                     self.entity_match_count_dict[_cluster_text][str(_span).lower()] += 1
-                
+
                     if _span.root.dep_ == 'nsubj':
                         _verb = _span.root.head.lemma_.lower()
-                        nsubj_verb_count_dict[(_cluster_text, _verb)] += 1   
+                        nsubj_verb_count_dict[(_cluster_text, _verb)] += 1
 
                     elif _span.root.dep_ == 'dobj':
-                        _verb = _span.root.head.lemma_.lower() 
-                        dobj_verb_count_dict[(_cluster_text, _verb)] += 1   
+                        _verb = _span.root.head.lemma_.lower()
+                        dobj_verb_count_dict[(_cluster_text, _verb)] += 1
 
         return nsubj_verb_count_dict, dobj_verb_count_dict
-    
+
 
     def __parse_and_extract(self, text, persona_patterns_dict):
 
@@ -448,7 +448,7 @@ class Riveter:
         doc = nlp(text)
 
         for _parsed_sentence in doc.sents:
-            for _noun_chunk in _parsed_sentence.noun_chunks:   
+            for _noun_chunk in _parsed_sentence.noun_chunks:
 
                 if _noun_chunk.root.dep_ == 'nsubj':
 
@@ -461,7 +461,7 @@ class Riveter:
 
                             _nusbj = _persona
                             _verb = _noun_chunk.root.head.lemma_.lower()
-                            nsubj_verb_count_dict[(_nusbj, _verb)] += 1     
+                            nsubj_verb_count_dict[(_nusbj, _verb)] += 1
 
                 elif _noun_chunk.root.dep_ == 'dobj':
 
@@ -473,14 +473,14 @@ class Riveter:
                             self.entity_match_count_dict[_persona][_noun_chunk.text.lower()] += 1
 
                             _dobj = _persona
-                            _verb = _noun_chunk.root.head.lemma_.lower() 
-                            dobj_verb_count_dict[(_dobj, _verb)] += 1   
+                            _verb = _noun_chunk.root.head.lemma_.lower()
+                            dobj_verb_count_dict[(_dobj, _verb)] += 1
 
         return nsubj_verb_count_dict, dobj_verb_count_dict
 
 
     def __score_document(self,
-                         nsubj_verb_count_dict, 
+                         nsubj_verb_count_dict,
                          dobj_verb_count_dict):
 
         persona_score_dict = defaultdict(float)
@@ -556,11 +556,11 @@ class Riveter:
 
 
     def __get_persona_counts_per_document(self,
-                                          nsubj_verb_count_dict, 
+                                          nsubj_verb_count_dict,
                                           dobj_verb_count_dict):
 
         persona_count_dict = defaultdict(int)
-        
+
         for (_persona, _verb), _count in nsubj_verb_count_dict.items():
             persona_count_dict[_persona] += _count
         for (_persona, _verb), _count in dobj_verb_count_dict.items():
@@ -576,5 +576,5 @@ class Riveter:
         for _id, _nsubj_verb_count_dict in id_nsubj_verb_count_dict.items():
             for (_persona, _verb), _count in _nsubj_verb_count_dict.items():
                 verb_count_dict[_verb] += 1
-        
+
         return verb_count_dict
