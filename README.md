@@ -79,3 +79,144 @@ persona_score_dict = riveter.get_score_totals()
 
 *Note: [Here](https://towardsdatascience.com/get-your-conda-environment-to-show-in-jupyter-notebooks-the-easy-way-17010b76e874) are some instructions for how to run `demo.ipynb` from the riveterEnv.*
 
+<br>
+
+## Documentation
+
+        
+#### `get_score_totals(frequency_threshold=0)`
+
+Get the final scores for all the entities, above some frequency threshold across the dataset.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| `frequency_threshold` | integer | Optional: Entities must be matched to at least this many verbs to appear in the output. |
+| RETURNS | dictionary | Dictionary of entities and their total scores. |
+
+<br>
+
+#### `plot_scores(number_of_scores=10, title="Personas by Score", frequency_threshold=0)`
+
+Create a bar plot showing the final scores across the dataset.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| `number_of_scores` | integer | Optional: Show only the top or bottom number of scores. |
+| `title` | string | Optional: Plot title. |
+| `frequency_threshold` | integer | Optional: Entities must be matched to at least this many verbs to appear in the output. |
+
+<br>
+
+#### `get_scores_for_doc(doc_id, frequency_threshold=0)`
+
+Get the final scores for all the entities, above some frequency threshold in a single document.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| `doc_id` | string or integer | Show results for this document ID. |
+| `frequency_threshold` | integer | Optional: Entities must be matched to at least this many verbs to appear in the output. |
+| RETURNS | dictionary | Nested dictionary of document IDs, entities, and their total scores. |
+
+<br>
+
+#### `plot_scores_for_doc(doc_id, number_of_scores=10, title="Personas by Score", frequency_threshold=0)`
+
+Create a bar plot showing the final scores for a single document.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| `doc_id` | string or integer | Show results for this document ID. |
+| `number_of_scores` | integer | Optional: Show only the top or bottom number of scores. |
+| `title` | string | Optional: Plot title. |
+| `frequency_threshold` | integer | Optional: Entities must be matched to at least this many verbs to appear in the output. |
+
+<br>
+
+#### `get_persona_polarity_verb_count_dict()`
+
+Gets all the verbs, their frequencies, and whether they contributed positively or negatively to the final scores for every entity. Computed across the whole dataset.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| RETURNS | dictionary | Nested dictionary of entities, positive or negative contribution, verbs, and counts. |
+
+<br>
+
+#### `plot_verbs_for_persona(persona, figsize=None, output_path=None)`
+
+Create a heatmap showing the verb counts for a single persona.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| `persona` | string | The entity whose results will be shown in the plot. |
+| `figsize` | tuple | Optional: Figure dimensions, e.g. (2, 4). |
+| `output_path` | string | Optional: Where to save the plot as a file. |
+
+<br>
+
+#### `get_persona_counts()`
+
+Get the total counts for the entities (all entity matches, whether or not they were matched to a lexicon verb).
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| RETURNS | dictionary | Dictionary of entities and integer counts. |
+
+<br>
+
+#### `count_personas_for_doc(doc_id)`
+
+Get the entity counts for a single document.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| doc_id | string or integer | Show results for this document ID |
+| RETURNS | dictionary | Dictionary of entities and integer counts. |
+
+<br>
+
+#### `count_scored_verbs_for_doc(doc_id)`
+
+Get the verb counts (verbs that were matched to the lexicon) for a single document.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| doc_id | string or integer | Show results for this document ID |
+| RETURNS | dictionary | Dictionary of verbs and integer counts. |
+
+<br>
+
+#### `count_nsubj_for_doc(doc_id, matched_only=False)`
+
+Get the noun subject counts for a single document.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| doc_id | string or integer | Show results for this document ID |
+| matched_only | boolean | If true, return only the subjects that were matched to identified entities. |
+| RETURNS | dictionary | Dictionary of noun subjects and integer counts. |
+
+<br>
+
+#### `count_dobj_for_doc(doc_id,matched_only=False)`
+
+Get the direct object counts for a single document.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| doc_id | string or integer | Show results for this document ID |
+| matched_only | boolean | If true, return only the direct objects that were matched to identified entities. |
+| RETURNS | dictionary | Dictionary of direct object and integer counts. |
+
+<br>
+
+#### `get_persona_cluster(persona)`
+
+Get the full entity cluster from `neuralcoref`.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| persona | string | Show results for this entity. |
+| RETURNS | dictionary | Dictionary of the main entity string and all of its string matches. |
+
+<br>
