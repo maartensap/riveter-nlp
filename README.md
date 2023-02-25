@@ -86,11 +86,11 @@ persona_score_dict = riveter.get_score_totals()
         
 #### `get_score_totals(frequency_threshold=0)`
 
-Displays basic statistics about the training dataset.
+Get the final scores for all the entities, above some frequency threshold.
 
 | Name               | Type              | Description                      |
 | ------------------ | ----------------- | -------------------------------- |
-| `frequency_threshold` | integer | Optional: Documents that will be used to train the topic model. |
+| `frequency_threshold` | integer | Optional: Entities must be matched to at least this many verbs to appear in the output. |
 | RETURNS | dictionary | Dictionary of entities and their total scores. |
 
 <br>
