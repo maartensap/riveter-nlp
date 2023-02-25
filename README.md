@@ -68,7 +68,7 @@ python -m spacy download en_core_web_sm
 
 ### riveter.py
 
-To run `riveter.py`, see the example in `demo.ipynb` (located in the `riveter` directory).
+To run `riveter.py`, see the example in [our demo notebook](https://github.com/maartensap/riveter-nlp/blob/main/riveter/demo.ipynb).
 
 ```python
 riveter = Riveter()  
