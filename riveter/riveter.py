@@ -54,6 +54,7 @@ class Riveter:
         self.id_persona_scored_verb_dict = None # the number of scored verbs for each document and persona
         self.entity_match_count_dict = defaultdict(default_dict_int)
         self.persona_count_dict = defaultdict(int)
+        self.persona_match_count_dict = defaultdict(int)
         self.people_words = None
         self.persona_polarity_verb_count_dict = defaultdict(default_dict_int_2)
 
@@ -151,7 +152,7 @@ class Riveter:
 
 
     def get_score_totals(self, frequency_threshold=0):
-        return {p: s for p, s in self.persona_score_dict.items() if self.persona_count_dict[p] >= frequency_threshold}
+        return {p: s for p, s in self.persona_score_dict.items() if self.persona_match_count_dict[p] >= frequency_threshold}
     
 
     def plot_scores(self, number_of_scores = 10, title = "Personas by Score", frequency_threshold=0):
@@ -490,6 +491,7 @@ class Riveter:
                 persona_scored_verbs_dict[_persona] += 1
                 _agent_score = self.verb_score_dict[_verb]['agent']
                 persona_score_dict[_persona] += (_count*_agent_score)
+                self.persona_match_count_dict[_persona] += 1
                 if _agent_score < 0:
                     self.persona_polarity_verb_count_dict[_persona]['negative'][_verb + '_nusbj'] += 1
                 elif _agent_score > 0:
@@ -500,6 +502,7 @@ class Riveter:
                 persona_scored_verbs_dict[_persona] += 1
                 _theme_score = self.verb_score_dict[_verb]['theme']
                 persona_score_dict[_persona] += (_count*_theme_score)
+                self.persona_match_count_dict[_persona] += 1
                 if _theme_score < 0:
                     self.persona_polarity_verb_count_dict[_persona]['negative'][_verb + '_dobj'] += 1
                 elif _theme_score > 0:
