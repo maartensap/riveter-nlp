@@ -18,12 +18,13 @@ Watch our two minute demo video here: [https://youtu.be/Uftyd8eCmFw](https://you
 
 ## Installation
 
-Requirements 
+### Requirements 
+
 - Python 3.8
 - numpy
 - pandas
 - neuralcoref
-- spaCy 2.3.9 (this is required for neuralcoref)
+- spaCy 2.3.9 (this version is required for neuralcoref)
 - seaborn
 - matplotlib
 
