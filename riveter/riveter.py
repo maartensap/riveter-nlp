@@ -272,6 +272,7 @@ class Riveter:
                     cbar=False,
                     vmin=min_count,
                     vmax=max_count,
+                    fmt='d',
                     # fmt='.4f',
                     square=True)
         ax.set_ylabel('')
