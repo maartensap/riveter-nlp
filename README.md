@@ -32,14 +32,16 @@ Check out our demo notebook here: [link](https://github.com/maartensap/riveter-n
 
 ### Installation instructions
 
-We strongly recommend creating a new virtual environment. Activate this environment before installing and before running the code.
+These instructions have been tested on OSX and Windows machines. We have not tested these instructions in Colab or other environments.
+
+1. We strongly recommend creating a new virtual environment. Activate this environment before installing and before running the code.
 
 ```bash
 conda create -n riveterEnv python=3.8
 conda activate riveterEnv
 ```
 
-Download this repo.
+2. Download this repo.
 
 ```bash
 git clone https://github.com/maartensap/riveter-nlp.git
@@ -48,7 +50,7 @@ cd riveter-nlp
 
 *Note: If installing on a Mac, you will need Xcode installed to run git from the command line.*
 
-Install `neuralcoref` from source. This will also install spaCy 2.3.9.
+3. Install `neuralcoref` from source. This will also install spaCy 2.3.9.
 ```bash
 git clone https://github.com/huggingface/neuralcoref.git
 cd neuralcoref
@@ -57,7 +59,7 @@ pip install -e .
 cd ..
 ```
 
-Install pandas and download spaCy files.
+4. Install pandas and download spaCy files.
 ```bash
 conda install pandas
 python -m spacy download en_core_web_sm
