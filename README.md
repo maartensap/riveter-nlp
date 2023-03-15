@@ -41,7 +41,7 @@ conda create -n riveterEnv python=3.8
 conda activate riveterEnv
 ```
 
-2. Download this repo.
+2. Download this repo by using the Git command below or by downloading the repository (click the green _Code_ button above, select _Download ZIP_, and then unzip the downloaded directory). 
 
 ```bash
 git clone https://github.com/maartensap/riveter-nlp.git
