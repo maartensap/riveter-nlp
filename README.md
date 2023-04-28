@@ -229,6 +229,16 @@ Get the full entity cluster from `neuralcoref`.
 
 ## Authorship and Citation
 
-This package was created by an interdiscplinary team including [Maria Antoniak](https://maria-antoniak.github.io/), [Anjalie Field](https://anjalief.github.io/), Jimin Mun, [Melanie Walsh](https://melaniewalsh.org/), [Lauren F. Klein](https://lklein.com/), and [Maarten Sap](https://maartensap.com/).
+This package was created by an interdiscplinary team including [Maria Antoniak](https://maria-antoniak.github.io/), [Anjalie Field](https://anjalief.github.io/), Jimin Mun, [Melanie Walsh](https://melaniewalsh.org/), [Lauren F. Klein](https://lklein.com/), and [Maarten Sap](https://maartensap.com/). You can find our paper writeup at the following URL: http://maartensap.com/pdfs/antoniak2023riveter.pdf
+
+Use the following BibTex to cite the paper:
+```bibtex
+@article{antoniak2023riveter,
+  title={Riveter: Measuring Power and Social Dynamics Between Entities},
+  author={Antoniak, Maria and Field, Anjalie and Mun, Ji Min and Walsh, Melanie and Klein, Lauren F. and Sap, Maarten},
+  year={2023},
+  url={http://maartensap.com/pdfs/antoniak2023riveter.pdf}
+}
+```
 
 <br>
