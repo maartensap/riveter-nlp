@@ -229,7 +229,7 @@ Get the full entity cluster from `neuralcoref`.
 
 #### `load_sap_lexicon(dimension='power')`
 
-Get the full entity cluster from `neuralcoref`.
+Load the verb lexicon from Sap et al., 2017.
 
 | Name               | Type              | Description                      |
 | ------------------ | ----------------- | -------------------------------- |
@@ -239,7 +239,7 @@ Get the full entity cluster from `neuralcoref`.
 
 #### `load_rashkin_lexicon(dimension='effect')`
 
-Get the full entity cluster from `neuralcoref`.
+Load the verb lexicon from Rashkin et al., 2016.
 
 | Name               | Type              | Description                      |
 | ------------------ | ----------------- | -------------------------------- |
@@ -249,7 +249,7 @@ Get the full entity cluster from `neuralcoref`.
 
 #### `load_custom_lexicon(lexicon_path, verb_column, agent_column, theme_column)`
 
-Get the full entity cluster from `neuralcoref`.
+Load your own verb lexicon.
 
 | Name               | Type              | Description                      |
 | ------------------ | ----------------- | -------------------------------- |
