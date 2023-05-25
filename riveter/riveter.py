@@ -77,11 +77,11 @@ class Riveter:
             print(f'Riveter successfully saved to "{filename}"')
 
 
-    def load_lexicon(self, label):
-        if label in ['power', 'agency']:
-            self.load_sap_lexicon(label)
-        else:
-            self.load_rashkin_lexicon(label)
+    # def load_lexicon(self, label):
+    #     if label in ['power', 'agency']:
+    #         self.load_sap_lexicon(label)
+    #     else:
+    #         self.load_rashkin_lexicon(label)
 
 
     def load_rashkin_lexicon(self, label='effect'):
@@ -124,6 +124,33 @@ class Riveter:
             if not pd.isnull(_row[label_column]):
                 _lemma  = _row['verb'].strip()
                 verb_score_dict[_lemma] = label_dict[_row[label_column]]
+
+        self.verb_score_dict = verb_score_dict
+
+
+    def load_custom_lexicon(self, lexicon_path, verb_column, agent_column, theme_column):
+        """
+        Allows the user to load their own lexicon.
+        Expects a TSV where one column contains the verb, one column contains the agent score, 
+        and one column contains the theme score. Other columns can also exist but will not be used.
+        The verb must be in the same form as Rashkin, e.g. "have" "say" "take".
+        The scores must be postive and negative numbers.
+        """
+
+        from IPython import embed
+        lexicon_df = pd.read_csv(lexicon_path, sep='\t')
+
+        verb_score_dict = defaultdict(default_dict_int)
+        for i, _row in lexicon_df.iterrows():
+
+            _lemma  = _row[verb_column].strip()
+
+            _score_dict = {'agent': 0, 'theme': 0}
+
+            _score_dict['agent'] += _row.get(agent_column, 0) 
+            _score_dict['theme'] += _row.get(theme_column, 0)
+
+            verb_score_dict[_lemma] = _score_dict
 
         self.verb_score_dict = verb_score_dict
 
