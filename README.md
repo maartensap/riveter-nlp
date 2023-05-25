@@ -227,6 +227,39 @@ Get the full entity cluster from `neuralcoref`.
 
 <br>
 
+#### `load_sap_lexicon(dimension='power')`
+
+Get the full entity cluster from `neuralcoref`.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| dimension | string | Select the lexicon: "power" or "agency". |
+
+<br>
+
+#### `load_rashkin_lexicon(dimension='effect')`
+
+Get the full entity cluster from `neuralcoref`.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| dimension | string | Select the lexicon: ["effect", "state", "value", "writer_perspective", "reader_perspective", "agent_theme_perspective", "theme_agent_perspective"]. |
+
+<br>
+
+#### `load_custom_lexicon(lexicon_path, verb_column, agent_column, theme_column)`
+
+Get the full entity cluster from `neuralcoref`.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| lexicon_path | string | Path the lexicon; this should be a TSV file. |
+| verb_column | string | Column in the TSV that contains the verb. This should be in the same form as the Rashkin lexicon, e.g. "have" "take". |
+| agent_column | string | Column containing the agent score (positive or negative number). |
+| theme_column | string | Column containing the theme score (positive or negative number). |
+
+<br>
+
 ## Authorship and Citation
 
 This package was created by an interdiscplinary team including [Maria Antoniak](https://maria-antoniak.github.io/), [Anjalie Field](https://anjalief.github.io/), Jimin Mun, [Melanie Walsh](https://melaniewalsh.org/), [Lauren F. Klein](https://lklein.com/), and [Maarten Sap](https://maartensap.com/). You can find our paper writeup at the following URL: http://maartensap.com/pdfs/antoniak2023riveter.pdf
