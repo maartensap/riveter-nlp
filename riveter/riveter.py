@@ -84,7 +84,7 @@ class Riveter:
     #         self.load_rashkin_lexicon(label)
 
 
-    def load_rashkin_lexicon(self, label='effect'):
+    def load_rashkin_lexicon(self, dimension='effect'):
         """
         label can be any of [effect, state, value, writer_perspective, reader_perspective, agent_theme_perspective, theme_agent_perspective].
         Note: the persp
@@ -100,15 +100,15 @@ class Riveter:
 
             _score_dict = {'agent': 0, 'theme': 0}
 
-            _score_dict['agent'] += _row.get(label + '(a)',0) # TODO: Should the Rashkin scores be converted to [-1, 0, 1]?
-            _score_dict['theme'] += _row.get(label + '(t)',0)
+            _score_dict['agent'] += _row.get(dimension + '(a)',0) # TODO: Should the Rashkin scores be converted to [-1, 0, 1]?
+            _score_dict['theme'] += _row.get(dimension + '(t)',0)
 
             verb_score_dict[_lemma] = _score_dict
 
         self.verb_score_dict = verb_score_dict
 
 
-    def load_sap_lexicon(self, label_column):
+    def load_sap_lexicon(self, dimension='power'):
 
         label_dict = {'power_agent':  {'agent': 1, 'theme': -1},
                       'power_theme':  {'agent': -1, 'theme': 1},
@@ -121,9 +121,9 @@ class Riveter:
 
         verb_score_dict = defaultdict(default_dict_int)
         for i, _row in lexicon_df.iterrows():
-            if not pd.isnull(_row[label_column]):
+            if not pd.isnull(_row[dimension]):
                 _lemma  = _row['verb'].strip()
-                verb_score_dict[_lemma] = label_dict[_row[label_column]]
+                verb_score_dict[_lemma] = label_dict[_row[dimension]]
 
         self.verb_score_dict = verb_score_dict
 
