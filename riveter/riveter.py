@@ -4,7 +4,9 @@ import re
 import os
 import pandas as pd
 import pickle
+import random
 
+import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -47,6 +49,7 @@ class Riveter:
         self.texts = None
         self.verb_score_dict = None
         self.persona_score_dict = None
+        self.persona_sd_dict = None
         self.id_persona_score_dict = None
         self.id_persona_count_dict = None
         self.id_nsubj_verb_count_dict = None
@@ -167,13 +170,14 @@ class Riveter:
         self.people_words.extend([people_word])
 
 
-    def train(self, texts, text_ids, persona_patterns_dict=None):
+    def train(self, texts, text_ids, num_bootstraps=None, persona_patterns_dict=None):
 
         # Hacky solution to force refresh when calling train() again
         if self.texts:
             self.texts = None
             # self.verb_score_dict = None   # not this one, this is loaded on initalizing the Riveter object
             self.persona_score_dict = None
+            self.persona_sd_dict = None
             self.id_persona_score_dict = None
             self.id_persona_count_dict = None
             self.id_nsubj_verb_count_dict = None
@@ -188,39 +192,59 @@ class Riveter:
         self.texts = texts
         self.text_ids = text_ids
         self.persona_score_dict, \
+            self.persona_sd_dict, \
             self.id_persona_score_dict, \
             self.id_persona_count_dict, \
             self.id_nsubj_verb_count_dict, \
             self.id_dobj_verb_count_dict, \
-            self.id_persona_scored_verb_dict = self.__score_dataset(self.texts, self.text_ids, persona_patterns_dict)
+            self.id_persona_scored_verb_dict = self.__score_dataset(self.texts, self.text_ids, num_bootstraps, persona_patterns_dict)
 
 
     def get_score_totals(self, frequency_threshold=0):
         return {p: s for p, s in self.persona_score_dict.items() if self.persona_match_count_dict[p] >= frequency_threshold}
     
 
-    def plot_scores(self, number_of_scores = 10, title = "Personas by Score", frequency_threshold=0):
+    def plot_scores(self, title='Personas by Score', frequency_threshold=0, number_of_scores=10, target_personas=None, figsize=None, output_path=None):
 
         # Make scores dict into dataframe
         _normalized_dict = self.get_score_totals(frequency_threshold)
-        df = pd.DataFrame(_normalized_dict.items(), columns = ["persona", "score"])
-        df = df.sort_values(by = "score", ascending = False)
+        df = pd.DataFrame(_normalized_dict.items(), columns=['persona', 'score'])
+        df = df.sort_values(by='score', ascending=False)
 
-        # If user asks for bottom x scores, e.g. -10
-        if number_of_scores < 0:
-            df = df[number_of_scores:]
-            df = df.sort_values(by = "score", ascending = True)
+        if self.persona_sd_dict:
+            df['sd'] = df['persona'].apply(lambda x: self.persona_sd_dict[x])
 
-        # If user asks for top x scores, e.g. 10
+        if target_personas:
+            df = df[df['persona'].isin(target_personas)]
+            df = df.sort_values(by='score', ascending=True)
+
         else:
-            df = df[:number_of_scores]
+
+            # If user asks for bottom x scores, e.g. -10
+            if number_of_scores < 0:
+                df = df[number_of_scores:]
+                df = df.sort_values(by='score', ascending=True)
+
+            # If user asks for top x scores, e.g. 10
+            else:
+                df = df[:number_of_scores]
+
 
         # Make bar plot with line at 0
-        graph = sns.barplot(data= df, x="persona", y="score", color = "skyblue")
-        graph.axhline(0, c = "black")
+        if figsize:
+            plt.figure(figsize=figsize)
+        ax = sns.barplot(data=df, x='persona', y='score', color='skyblue')
+        if self.persona_sd_dict:
+            ax.errorbar(data=df, x='persona', y='score', yerr='sd', ls='', lw=1, color='black', capsize=4)
+        ax.axhline(0, c='black')
         plt.xticks(rotation=45, ha='right')
         plt.title(title)
+        sns.despine()
         plt.tight_layout()
+
+        if output_path:
+            plt.savefig(output_path, bbox_inches='tight')
+
 
 
     def get_scores_for_doc(self, doc_id, frequency_threshold=0):
@@ -229,25 +253,25 @@ class Riveter:
                 if self.persona_count_dict[p] >= frequency_threshold}
 
 
-    def plot_scores_for_doc(self, doc_id, number_of_scores = 10, title = "Personas by Score", frequency_threshold=0):
+    def plot_scores_for_doc(self, doc_id, number_of_scores=10, title='Personas by Score', frequency_threshold=0):
 
     # Make scores dict into dataframe
         _normalized_dict =  self.get_scores_for_doc(doc_id, frequency_threshold=0)
-        df = pd.DataFrame(_normalized_dict.items(), columns = ["persona", "score"])
-        df = df.sort_values(by = "score", ascending = False)
+        df = pd.DataFrame(_normalized_dict.items(), columns = ['persona', 'score'])
+        df = df.sort_values(by='score', ascending=False)
 
         # If user asks for bottom x scores, e.g. -10
         if number_of_scores < 0:
             df = df[number_of_scores:]
-            df = df.sort_values(by = "score", ascending = True)
+            df = df.sort_values(by='score', ascending=True)
 
         # If user asks for top x scores, eg. 10
         else:
             df = df[:number_of_scores]
 
         # Make bar plot with line at 0
-        graph = sns.barplot(data= df, x="persona", y="score", color = "skyblue")
-        graph.axhline(0, c = "black")
+        graph = sns.barplot(data= df, x='persona', y='score', color='skyblue')
+        graph.axhline(0, c='black')
         plt.xticks(rotation=45, ha='right')
         plt.title(title)
         plt.tight_layout()
@@ -556,9 +580,22 @@ class Riveter:
                     self.persona_polarity_verb_count_dict[_persona]['positive'][_verb + '_dobj'] += 1
 
         return persona_score_dict, persona_scored_verbs_dict
+    
+
+    def __get_persona_score_dict(self, persona_score_dicts, persona_count_dict):
+
+        persona_score_dict = defaultdict(float)
+        for _persona_score_dict in persona_score_dicts:
+            for _persona, _score in _persona_score_dict.items():
+                persona_score_dict[_persona] += _score
+
+        # Normalize the scores over the total number of nsubj and dobj occurrences in the dataset for this persona
+        persona_score_dict = {p: s/float(persona_count_dict[p]) for p, s in persona_score_dict.items() if persona_count_dict[p] > 0}
+
+        return persona_score_dict
 
 
-    def __score_dataset(self, texts, text_ids, persona_patterns_dict):
+    def __score_dataset(self, texts, text_ids, num_bootstraps, persona_patterns_dict):
 
         id_nsubj_verb_count_dict = {}
         id_dobj_verb_count_dict = {}
@@ -582,16 +619,42 @@ class Riveter:
             id_dobj_verb_count_dict[_id] = _dobj_verb_count_dict
             id_persona_scored_verb_dict[_id] = _persona_scored_verb_dict
 
-        persona_score_dict = defaultdict(float)
-        for _id, _persona_score_dict in id_persona_score_dict.items():
-            for _persona, _score in _persona_score_dict.items():
-                persona_score_dict[_persona] += _score
+        persona_score_dict = None
+        persona_sd_dict = None
+        
+        if not num_bootstraps:
+            persona_score_dict = self.__get_persona_score_dict(list(id_persona_score_dict.keys()), self.persona_count_dict)
 
-        # Normalize the scores over the total number of nsubj and dobj occurrences in the dataset for this persona
-        persona_score_dict = {p: s/float(self.persona_count_dict[p]) for p, s in persona_score_dict.items() if self.persona_count_dict[p] > 0}
+        # If requested, resample multiple times and calculate means and standard deviations
+        else:
+
+            _id_list = list(id_nsubj_verb_count_dict.keys())
+            _persona_scores_dict = defaultdict(list)
+
+            for i in range(num_bootstraps):
+
+                _sampled_ids = random.choices(_id_list, k=len(_id_list))
+
+                _sampled_persona_count_dict = defaultdict(int)
+                for _id in _sampled_ids:
+                    for _persona, _count in id_persona_count_dict[_id].items():
+                        _sampled_persona_count_dict[_persona] += _count
+
+                _sampled_persona_score_dicts = [id_persona_score_dict[_id] for _id in _sampled_ids]
+
+                _persona_score_dict = self.__get_persona_score_dict(_sampled_persona_score_dicts, _sampled_persona_count_dict)
+                for _persona, _score in _persona_score_dict.items():
+                    _persona_scores_dict[_persona].append(_score)
+
+            persona_score_dict = {}
+            persona_sd_dict = {}
+            for _persona, _scores in _persona_scores_dict.items():
+                persona_score_dict[_persona] = np.mean(_scores)
+                persona_sd_dict[_persona] = np.std(_scores)
 
         print(str(datetime.now())[:-7] + ' Complete!')
-        return persona_score_dict, id_persona_score_dict, id_persona_count_dict, id_nsubj_verb_count_dict, id_dobj_verb_count_dict, id_persona_scored_verb_dict
+
+        return persona_score_dict, persona_sd_dict, id_persona_score_dict, id_persona_count_dict, id_nsubj_verb_count_dict, id_dobj_verb_count_dict, id_persona_scored_verb_dict
 
 
     def __get_persona_counts_per_document(self,
