@@ -223,12 +223,12 @@ class Riveter:
             # If user asks for bottom x scores, e.g. -10
             if number_of_scores < 0:
                 df = df[number_of_scores:]
-                df = df.sort_values(by='score', ascending=True)
+                df = df.sort_values(by='score', ascending=False)
 
             # If user asks for top x scores, e.g. 10
             else:
                 df = df[:number_of_scores]
-
+                df = df.sort_values(by='score', ascending=False)
 
         # Make bar plot with line at 0
         if figsize:
