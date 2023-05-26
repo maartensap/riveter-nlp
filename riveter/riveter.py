@@ -363,7 +363,7 @@ class Riveter:
         return counts
 
 
-    def count_dobj_for_doc(self, doc_id,matched_only=False):
+    def count_dobj_for_doc(self, doc_id, matched_only=False):
         """Returns the set of persona-verb pairs (where persona is the object of the verb)
         matched_only: only returns the verbs that are in the lexicon
         """
@@ -371,6 +371,39 @@ class Riveter:
         if matched_only:
             counts = {pair: cnt for pair,cnt in counts.items() if pair[1] in self.verb_score_dict}
         return counts
+    
+
+    def get_documents_for_verb(self, target_verb):
+
+        id_text_dict = {_id: _text for _text, _id in zip(self.texts, self.text_ids)}
+
+        target_ids = [] 
+        for _id, _dobj_verb_count_dict in self.id_dobj_verb_count_dict.items():
+            for (_dobj, _verb), _count in _dobj_verb_count_dict.items():
+                if _verb.lower() == target_verb.lower():
+                    target_ids.append(_id)
+        for _id, _nsubj_verb_count_dict in self.id_nsubj_verb_count_dict.items():
+            for (_nsubj, _verb), _count in _nsubj_verb_count_dict.items():
+                if _verb.lower() == target_verb.lower():
+                    target_ids.append(_id)
+        target_ids = list(set(target_ids))
+
+        return target_ids, [_text for _id, _text in id_text_dict.items() if _id in target_ids]
+    
+
+    def get_documents_for_persona(self, target_persona):
+
+        id_text_dict = {_id: _text for _text, _id in zip(self.texts, self.text_ids)}
+
+        target_ids = [] 
+        for _id, _persona_verb_dict in self.id_persona_scored_verb_dict.items():
+            for _persona, _count in _persona_verb_dict.items():
+                if _persona.lower() == target_persona.lower():
+                    target_ids.append(_id)
+        target_ids = list(set(target_ids))
+
+        return target_ids, [_text for _id, _text in id_text_dict.items() if _id in target_ids]
+
 
 
     def get_persona_cluster(self, persona):
