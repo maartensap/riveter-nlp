@@ -260,6 +260,28 @@ Load your own verb lexicon.
 
 <br>
 
+#### `get_documents_for_verb(target_verb)`
+
+Find all the documents matched to the verb.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| target_verb | string | The verb you'd like to match. |
+| RETURNS | (list, list) | List of matched document IDs, list of matched document texts. |
+
+<br>
+
+#### `get_documents_for_persona(target_persona)`
+
+Find all the documents matched to the persona.
+
+| Name               | Type              | Description                      |
+| ------------------ | ----------------- | -------------------------------- |
+| target_persona | string | The persona you'd like to match. |
+| RETURNS | (list, list) | List of matched document IDs, list of matched document texts. |
+
+<br>
+
 ## Authorship and Citation
 
 This package was created by an interdiscplinary team including [Maria Antoniak](https://maria-antoniak.github.io/), [Anjalie Field](https://anjalief.github.io/), Jimin Mun, [Melanie Walsh](https://melaniewalsh.org/), [Lauren F. Klein](https://lklein.com/), and [Maarten Sap](https://maartensap.com/). You can find our paper writeup at the following URL: http://maartensap.com/pdfs/antoniak2023riveter.pdf
