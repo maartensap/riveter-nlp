@@ -4,7 +4,7 @@
 
 The Riveter 💪 package measures social dynamics between personas mentioned in a collection of texts.
 
-The package identifies and extracts the subjects, verbs, and direct objects in texts; it performs coreference resolution on the personas mentioned in the texts (e.g., clustering "Elizabeth Bennet" and "she" together as one persona); and it measures social dynamics between the personas by referencing a given lexicon. The package currently includes lexica for Maarten Sap et al's ***connotation frames of power and agency*** and Rashkin et al's ***connotation frames of perspective, effect, value, and mental state*** — but you can also load your own custom lexicon.
+The package identifies and extracts the subjects, verbs, and direct objects in texts; it performs coreference resolution on the personas mentioned in the texts (e.g., clustering "Elizabeth Bennet" and "she" together as one persona); and it measures social dynamics between the personas by referencing a given lexicon. The package currently includes lexica for Maarten Sap et al's ***connotation frames of power and agency*** and Rashkin et al's ***connotation frames of perspective, effect, value, and mental state***, but you can also load your own custom lexicon.
 
 The name Riveter is inspired by ["Rosie the Riveter,"](https://en.wikipedia.org/wiki/File:We_Can_Do_It!.jpg) the allegorical figure who came to represent American women working in factories and at other industrial jobs during World War II. Rosie the Riveter has become an iconic symbol of power and shifting gender roles — subjects that the Riveter package aims to help users measure and explore.    
 
