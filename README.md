@@ -2,7 +2,7 @@
 
 <br>
 
-The Riveter 💪 package measures social dynamics between personas mentioned in a collection of texts.
+Riveter 💪 is a Python package that measures social dynamics between personas mentioned in a collection of texts.
 
 The package identifies and extracts the subjects, verbs, and direct objects in texts; it performs coreference resolution on the personas mentioned in the texts (e.g., clustering "Elizabeth Bennet" and "she" together as one persona); and it measures social dynamics between the personas by referencing a given lexicon. The package currently includes lexica for Maarten Sap et al's ***connotation frames of power and agency*** and Rashkin et al's ***connotation frames of perspective, effect, value, and mental state***, but you can also load your own custom lexicon.
 
