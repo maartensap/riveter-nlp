@@ -22,13 +22,12 @@ Check out our demo notebook here: [link](https://github.com/maartensap/riveter-n
 
 ### Requirements 
 
-- Python 3.8
+- Python 3.10
 - numpy
 - pandas
-- neuralcoref
-- spaCy 2.3.9 (this version is required for neuralcoref)
 - seaborn
 - matplotlib
+- spacy-experimental
 
 ### Installation instructions
 
@@ -37,7 +36,7 @@ These instructions have been tested on OSX and Windows machines. We have not tes
 1. We strongly recommend creating a new virtual environment. Activate this environment before installing and before running the code.
 
 ```bash
-conda create -n riveterEnv python=3.8
+conda create -n riveterEnv python=3.10
 conda activate riveterEnv
 ```
 
@@ -50,19 +49,17 @@ cd riveter-nlp
 
 *Note: If installing on a Mac, you will need Xcode installed to run git from the command line.*
 
-3. Install `neuralcoref` from source. This will also install spaCy 2.3.9.
+3. Install spacy-experimental and the spaCy model files.
 ```bash
-git clone https://github.com/huggingface/neuralcoref.git
-cd neuralcoref
-pip install -r requirements.txt
-pip install -e .
-cd ..
+pip install -U spacy-experimental
+pip install https://github.com/explosion/spacy-experimental/releases/download/v0.6.0/en_coreference_web_trf-3.4.0a0-py3-none-any.whl#egg=en_coreference_web_trf
+python -m spacy download en_core_web_sm
 ```
 
-4. Install pandas and download spaCy files.
+4. Install pandas and seaborn.
 ```bash
 conda install pandas
-python -m spacy download en_core_web_sm
+conda install seaborn
 ```
 
 <br>
