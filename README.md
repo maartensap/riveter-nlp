@@ -22,7 +22,7 @@ Check out our demo notebook here: [link](https://github.com/maartensap/riveter-n
 
 ### Requirements 
 
-- Python 3.10
+- Python 3.9
 - numpy
 - pandas
 - seaborn
@@ -36,7 +36,7 @@ These instructions have been tested on OSX and Windows machines. We have not tes
 1. We strongly recommend creating a new virtual environment. Activate this environment before installing and before running the code.
 
 ```bash
-conda create -n riveterEnv python=3.10
+conda create -n riveterEnv python=3.9
 conda activate riveterEnv
 ```
 
