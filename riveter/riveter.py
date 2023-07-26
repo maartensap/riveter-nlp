@@ -12,11 +12,24 @@ import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 
-import spacy
-nlp = spacy.load('en_core_web_sm')
+# import spacy
+# import spacy_experimental
+# # nlp = spacy.load('en_core_web_sm')
+# nlp = spacy.load('en_coreference_web_trf')
 
-import neuralcoref
-nlp.add_pipe(neuralcoref.NeuralCoref(nlp.vocab,blacklist=False),name="neuralcoref")
+# SPACY & COREF IMPORTS
+import spacy
+import spacy_experimental
+nlp = spacy.load("en_core_web_sm")
+nlp_coref = spacy.load("en_coreference_web_trf")
+
+# use replace_listeners for the coref components
+nlp_coref.replace_listeners("transformer", "coref", ["model.tok2vec"])
+nlp_coref.replace_listeners("transformer", "span_resolver", ["model.tok2vec"])
+
+# we won't copy over the span cleaner
+nlp.add_pipe("coref", source=nlp_coref)
+nlp.add_pipe("span_resolver", source=nlp_coref)
 
 
 NER_TAGS = ["PERSON"]
@@ -417,90 +430,26 @@ class Riveter:
     #     return df[text_column].tolist(), df[id_column].tolist()
 
 
-    def __getCorefClusters(self, spacyDoc):
-        clusters = spacyDoc._.coref_clusters
-        return clusters
+    # def __getCorefClusters(self, spacyDoc):
+    #     clusters = spacyDoc._.coref_clusters
+    #     return clusters
 
 
-    def __isSpanPerson(self,span,peopleWords):
-        isPerson = len(span.ents) > 0
-        isPerson = isPerson and any([e.label_ in NER_TAGS for e in span.ents])
-        isPerson = isPerson or any([w.text.lower()==p.lower() for w in span for p in peopleWords])
-        return isPerson
+    # def __isSpanPerson(self,span,peopleWords):
+    #     isPerson = len(span.ents) > 0
+    #     isPerson = isPerson and any([e.label_ in NER_TAGS for e in span.ents])
+    #     isPerson = isPerson or any([w.text.lower()==p.lower() for w in span for p in peopleWords])
+    #     return isPerson
 
 
-    def __isClusterPerson(self,cluster,peopleWords):
-        areMentionsPeople = [self.__isSpanPerson(m,peopleWords) for m in cluster.mentions]
+    # def __isClusterPerson(self,cluster,peopleWords):
+    #     areMentionsPeople = [self.__isSpanPerson(m,peopleWords) for m in cluster.mentions]
 
-        if all(areMentionsPeople):
-            return True
+    #     if all(areMentionsPeople):
+    #         return True
 
-        pctMentionsPeople = sum(areMentionsPeople) / len(areMentionsPeople)
-        return pctMentionsPeople >=.5
-
-
-    def __getPeopleClusters(self, spacyDoc, peopleWords):
-
-        clusters = self.__getCorefClusters(spacyDoc)
-
-        # need to add singleton clusters for tokens detected as people
-        singletons = {}
-
-        peopleClusters = set()
-        # adding I / you clusters to people
-        main2cluster = {c.main.text: c for c in clusters}
-
-        if "I" in main2cluster:
-            peopleClusters.add(main2cluster["I"])
-        if "you" in main2cluster:
-            peopleClusters.add(main2cluster["you"])
-
-        # This checks if each coref cluster contains a "person", and only keeps clusters that contain at least 1 person
-        # it also adds singletons
-        for span in spacyDoc.noun_chunks:
-            isPerson = self.__isSpanPerson(span,peopleWords)
-            # isPerson2 = len(span.ents) > 0 and any([e.label_ in NER_TAGS for e in span.ents])
-            # isPerson2 = isPerson2 or any([w.text.lower()==p.lower() for w in span for p in peopleWords])
-
-            if isPerson:
-
-                # check if it's in the clusters to add people
-                inClusterAlready = False
-                for c in clusters:
-                    if any([m.start == span.start and m.end == span.end for m in c.mentions]):
-                        #print("Yes", c)
-                        peopleClusters.add(c)
-                        inClusterAlready = True
-
-                # also add singletons, which may be real singletons or mis-matched ones
-                if not inClusterAlready:
-                    # simple heuristic to fix coref bug:
-                    # if the span text is the exact same as the main cluster mention, merge
-
-                    matched = [c for c in peopleClusters if c.main.text == span.text]
-                    if len(matched) > 0:
-                        matched = matched[0]
-                        matched.mentions.append(span)
-                    else:
-                        # else, make new cluster
-                        peopleClusters.add(neuralcoref.neuralcoref.Cluster(len(clusters),span,[span]))
-
-
-        # Re-iterating over noun chunks, that's the entities that are going to have verbs,
-        # and removing the coref mentions that are not a noun chunk
-        # Note that we keep coref mentions that noun chunks but not people (as long as something else in the chain is a person)
-        newClusters = {c.main:[] for c in peopleClusters}
-        for span in spacyDoc.noun_chunks:
-            for c in peopleClusters:
-                for m in c.mentions:
-                    if m.start==span.start and m.end == span.end and span.text == m.text:
-                        newClusters[c.main].append(span)
-
-        newPeopleClusters = [neuralcoref.neuralcoref.Cluster(i,main,mentions)
-                            for i,(main, mentions) in enumerate(newClusters.items())]
-        newPeopleClusters = [c for c in newPeopleClusters if self.__isClusterPerson(c,peopleWords)]
-
-        return newPeopleClusters
+    #     pctMentionsPeople = sum(areMentionsPeople) / len(areMentionsPeople)
+    #     return pctMentionsPeople >= 0.5
 
 
     def __parse_and_extract_coref(self, text):
@@ -510,36 +459,41 @@ class Riveter:
         nsubj_verb_count_dict = defaultdict(int)
         dobj_verb_count_dict = defaultdict(int)
 
-        doc = nlp(text)
+        if text.strip():
 
-        if self.people_words is None:
-            self.set_people_words(load_default=True)
+            doc = nlp(text)
 
-        clusters = self.__getPeopleClusters(doc, peopleWords=self.people_words)
+            if self.people_words is None:
+                self.set_people_words(load_default=True)
 
-        for _cluster in clusters:
+            # clusters = self.__getPeopleClusters(doc, peopleWords=self.people_words)
+            # clusters = doc.spans.values()
+            clusters = [val for key, val in doc.spans.items() if key.startswith('coref_cluster')]
 
-            _num_non_pronouns = len([_span for _span in _cluster if str(_span).lower() not in PRONOUNS])
+            for _cluster in clusters:
 
-            # If the cluster is only third person pronouns, don't include it (coref failed to match to an entity)
-            # Second condition handles weird edge case where the cluster key is in PRONOUNS but the spands include "you" or "I"
-            if _num_non_pronouns > 0 and str(_cluster.main).lower() not in PRONOUNS:
+                _num_non_pronouns = len([_span for _span in _cluster if str(_span).lower() not in PRONOUNS])
 
-                for _span in _cluster:
+                # If the cluster is only third person pronouns, don't include it (coref failed to match to an entity)
+                # Second condition handles weird edge case where the cluster key is in PRONOUNS but the spans include "you" or "I"
+                if _num_non_pronouns > 0: # and str(_cluster.root.text).lower() not in PRONOUNS:
 
-                    _cluster_text = str(_cluster.main).lower()
-                    _cluster_text = PRONOUN_SPECIAL_CASES.get(_cluster_text, _cluster_text)
+                    for _span in _cluster:
 
-                    self.persona_count_dict[_cluster_text] += 1
-                    self.entity_match_count_dict[_cluster_text][str(_span).lower()] += 1
+                        # _text = str(_span.root.text).lower()
+                        _text = str(_cluster[0].text).lower()
+                        _text = PRONOUN_SPECIAL_CASES.get(_text, _text)
+                        
+                        self.persona_count_dict[_text] += 1
+                        self.entity_match_count_dict[_text][str(_span).lower()] += 1
 
-                    if _span.root.dep_ == 'nsubj':
-                        _verb = _span.root.head.lemma_.lower()
-                        nsubj_verb_count_dict[(_cluster_text, _verb)] += 1
+                        if _span.root.dep_ == 'nsubj':
+                            _verb = _span.root.head.lemma_.lower()
+                            nsubj_verb_count_dict[(_text, _verb)] += 1
 
-                    elif _span.root.dep_ == 'dobj':
-                        _verb = _span.root.head.lemma_.lower()
-                        dobj_verb_count_dict[(_cluster_text, _verb)] += 1
+                        elif _span.root.dep_ == 'dobj':
+                            _verb = _span.root.head.lemma_.lower()
+                            dobj_verb_count_dict[(_text, _verb)] += 1
 
         return nsubj_verb_count_dict, dobj_verb_count_dict
 
@@ -549,36 +503,38 @@ class Riveter:
         nsubj_verb_count_dict = defaultdict(int)
         dobj_verb_count_dict = defaultdict(int)
 
-        doc = nlp(text)
+        if text.strip():
 
-        for _parsed_sentence in doc.sents:
-            for _noun_chunk in _parsed_sentence.noun_chunks:
+            doc = nlp(text)
 
-                if _noun_chunk.root.dep_ == 'nsubj':
+            for _parsed_sentence in doc.sents:
+                for _noun_chunk in _parsed_sentence.noun_chunks:
 
-                    for _persona, _pattern in persona_patterns_dict.items():
+                    if _noun_chunk.root.dep_ == 'nsubj':
 
-                        if re.findall(_pattern, _noun_chunk.text.lower()):
+                        for _persona, _pattern in persona_patterns_dict.items():
 
-                            self.persona_count_dict[_persona] += 1
-                            self.entity_match_count_dict[_persona][_noun_chunk.text.lower()] += 1
+                            if re.findall(_pattern, _noun_chunk.text.lower()):
 
-                            _nusbj = _persona
-                            _verb = _noun_chunk.root.head.lemma_.lower()
-                            nsubj_verb_count_dict[(_nusbj, _verb)] += 1
+                                self.persona_count_dict[_persona] += 1
+                                self.entity_match_count_dict[_persona][_noun_chunk.text.lower()] += 1
 
-                elif _noun_chunk.root.dep_ == 'dobj':
+                                _nusbj = _persona
+                                _verb = _noun_chunk.root.head.lemma_.lower()
+                                nsubj_verb_count_dict[(_nusbj, _verb)] += 1
 
-                    for _persona, _pattern in persona_patterns_dict.items():
+                    elif _noun_chunk.root.dep_ == 'dobj':
 
-                        if re.findall(_pattern, _noun_chunk.text.lower()):
+                        for _persona, _pattern in persona_patterns_dict.items():
 
-                            self.persona_count_dict[_persona] += 1
-                            self.entity_match_count_dict[_persona][_noun_chunk.text.lower()] += 1
+                            if re.findall(_pattern, _noun_chunk.text.lower()):
 
-                            _dobj = _persona
-                            _verb = _noun_chunk.root.head.lemma_.lower()
-                            dobj_verb_count_dict[(_dobj, _verb)] += 1
+                                self.persona_count_dict[_persona] += 1
+                                self.entity_match_count_dict[_persona][_noun_chunk.text.lower()] += 1
+
+                                _dobj = _persona
+                                _verb = _noun_chunk.root.head.lemma_.lower()
+                                dobj_verb_count_dict[(_dobj, _verb)] += 1
 
         return nsubj_verb_count_dict, dobj_verb_count_dict
 
@@ -656,7 +612,8 @@ class Riveter:
         persona_sd_dict = None
         
         if not num_bootstraps:
-            persona_score_dict = self.__get_persona_score_dict(list(id_persona_score_dict.keys()), self.persona_count_dict)
+            # persona_score_dict = self.__get_persona_score_dict(list(id_persona_score_dict.keys()), self.persona_count_dict)
+            persona_score_dict = self.__get_persona_score_dict(id_persona_score_dict.values(), self.persona_count_dict)
 
         # If requested, resample multiple times and calculate means and standard deviations
         else:
