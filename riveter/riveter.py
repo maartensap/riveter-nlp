@@ -504,18 +504,20 @@ class Riveter:
 
                 _text = self.__get_cluster_name(_cluster)
 
-                for _span in _cluster:
+                if _text not in ['that', 'which', 'who', 'what']:
 
-                    self.persona_count_dict[_text] += 1
-                    self.entity_match_count_dict[_text][str(_span).lower()] += 1
+                    for _span in _cluster:
 
-                    if _span.root.dep_ == 'ROOT':
-                        _verb = _span.root.lemma_.lower()
-                        nsubj_verb_count_dict[(_text, _verb)] += 1
+                        self.persona_count_dict[_text] += 1
+                        self.entity_match_count_dict[_text][str(_span).lower()] += 1
 
-                    elif _span.root.dep_ == 'dobj':
-                        _verb = _span.root.head.lemma_.lower()
-                        dobj_verb_count_dict[(_text, _verb)] += 1
+                        if _span.root.dep_ == 'ROOT':
+                            _verb = _span.root.lemma_.lower()
+                            nsubj_verb_count_dict[(_text, _verb)] += 1
+
+                        elif _span.root.dep_ == 'dobj':
+                            _verb = _span.root.head.lemma_.lower()
+                            dobj_verb_count_dict[(_text, _verb)] += 1
 
             # Check for single noun phrases that do not appear in coreference clusters
             for _noun_chunk in doc.noun_chunks:
@@ -531,16 +533,18 @@ class Riveter:
                     _text = _noun_chunk.text.lower().strip(',.!?\'"')
                     _text = re.sub(r'^(my|his|her|their|our|your|the|a|an) ', '', _text)
 
-                    self.persona_count_dict[_text] += 1
-                    self.entity_match_count_dict[_text][str(_noun_chunk).lower()] += 1
+                    if _text not in ['that', 'which', 'who', 'what']:
 
-                    if _noun_chunk.root.dep_ == 'nsubj':
-                        _verb = _noun_chunk.root.head.lemma_.lower()
-                        nsubj_verb_count_dict[(_text, _verb)] += 1
+                        self.persona_count_dict[_text] += 1
+                        self.entity_match_count_dict[_text][str(_noun_chunk).lower()] += 1
 
-                    elif _noun_chunk.root.dep_ == 'dobj':
-                        _verb = _noun_chunk.root.head.lemma_.lower()
-                        dobj_verb_count_dict[(_text, _verb)] += 1
+                        if _noun_chunk.root.dep_ == 'nsubj':
+                            _verb = _noun_chunk.root.head.lemma_.lower()
+                            nsubj_verb_count_dict[(_text, _verb)] += 1
+
+                        elif _noun_chunk.root.dep_ == 'dobj':
+                            _verb = _noun_chunk.root.head.lemma_.lower()
+                            dobj_verb_count_dict[(_text, _verb)] += 1
 
 
         return nsubj_verb_count_dict, dobj_verb_count_dict
