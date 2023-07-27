@@ -37,15 +37,15 @@ NER_TAGS = ["PERSON"]
 PRONOUNS = ['he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'they', 'them', 'their', 'themselves']
 BASEPATH = os.path.dirname(__file__)
 
-PRONOUN_MAP = {
-    "i": ["me", "my", "mine"],
-    "we": ["us", "ours", "our"],
-    "you": ["yours"]
-}
-PRONOUN_SPECIAL_CASES = {}
-for p, forms in PRONOUN_MAP.items():
-    for f in forms:
-        PRONOUN_SPECIAL_CASES[f] = p
+# PRONOUN_MAP = {
+#     "i": ["me", "my", "mine"],
+#     "we": ["us", "ours", "our"],
+#     "you": ["yours"]
+# }
+# PRONOUN_SPECIAL_CASES = {}
+# for p, forms in PRONOUN_MAP.items():
+#     for f in forms:
+#         PRONOUN_SPECIAL_CASES[f] = p
 
 
 def default_dict_int():
@@ -452,9 +452,43 @@ class Riveter:
     #     return pctMentionsPeople >= 0.5
 
 
+    def __get_cluster_name(self, cluster):
+
+        PRONOUN_MAP = {
+            "i": ["me", "my", "mine", "i"],
+            "we": ["us", "ours", "our", "we"],
+            "you": ["yours", "you", "your"],
+            "he": ['he', 'him', 'himself', 'his'],
+            'she': ['she', 'her', 'herself', 'hers'],
+            'they': ['they', 'them', 'themselves', 'their', 'theirs']
+        }
+
+        REVERSE_PRONOUN_MAP = {_pronoun: _label for _label, _pronouns in PRONOUN_MAP.items() for _pronoun in _pronouns}
+
+        # If every span contains the same pronoun, return this pronoun
+        pronoun_count_dict = defaultdict(int)
+        for _span in cluster:
+            for _token in _span:
+                if _token.pos_ == 'PRON' and _token.text.lower() in REVERSE_PRONOUN_MAP:
+                    pronoun_count_dict[REVERSE_PRONOUN_MAP[_token.text.lower()]] += 1
+        for _pronoun, _count in pronoun_count_dict.items():
+            if _count == len(cluster):
+                return _pronoun
+            
+        # Otherwise return the first mention (either whole phrase for just nsubj)
+        first_mention = cluster[0]
+        for _noun_chunk in first_mention.noun_chunks:
+            _text_to_return = _noun_chunk.text.lower().strip('.,!?\'"-')
+            return re.sub(r'^(my|his|her|their|our|your|the|a|an) ', '', _text_to_return)
+        
+        text_to_return = first_mention.text.lower().strip('.,!?\'"-')
+        return re.sub(r'^(my|his|her|their|our|your|the|a|an) ', '', text_to_return)
+
+
+    def __is_overlapping(self, x1, x2, y1, y2):
+        return max(x1,y1) <= min(x2,y2)
+
     def __parse_and_extract_coref(self, text):
-        # todo possibly: keep track of each spacy.Token / Span and return those along with the str representation, so
-        # that we can use that info later to visualize the lexicon output
 
         nsubj_verb_count_dict = defaultdict(int)
         dobj_verb_count_dict = defaultdict(int)
@@ -463,37 +497,51 @@ class Riveter:
 
             doc = nlp(text)
 
-            if self.people_words is None:
-                self.set_people_words(load_default=True)
-
-            # clusters = self.__getPeopleClusters(doc, peopleWords=self.people_words)
-            # clusters = doc.spans.values()
+            # Look for coreference clusters
             clusters = [val for key, val in doc.spans.items() if key.startswith('coref_cluster')]
 
             for _cluster in clusters:
 
-                _num_non_pronouns = len([_span for _span in _cluster if str(_span).lower() not in PRONOUNS])
+                _text = self.__get_cluster_name(_cluster)
 
-                # If the cluster is only third person pronouns, don't include it (coref failed to match to an entity)
-                # Second condition handles weird edge case where the cluster key is in PRONOUNS but the spans include "you" or "I"
-                if _num_non_pronouns > 0: # and str(_cluster.root.text).lower() not in PRONOUNS:
+                for _span in _cluster:
 
+                    self.persona_count_dict[_text] += 1
+                    self.entity_match_count_dict[_text][str(_span).lower()] += 1
+
+                    if _span.root.dep_ == 'ROOT':
+                        _verb = _span.root.lemma_.lower()
+                        nsubj_verb_count_dict[(_text, _verb)] += 1
+
+                    elif _span.root.dep_ == 'dobj':
+                        _verb = _span.root.head.lemma_.lower()
+                        dobj_verb_count_dict[(_text, _verb)] += 1
+
+            # Check for single noun phrases that do not appear in coreference clusters
+            for _noun_chunk in doc.noun_chunks:
+
+                in_coref_cluster = False
+                for _cluster in clusters:
                     for _span in _cluster:
+                        if self.__is_overlapping(_noun_chunk.start, _noun_chunk.end, _span.start, _span.end):
+                            in_coref_cluster = True
 
-                        # _text = str(_span.root.text).lower()
-                        _text = str(_cluster[0].text).lower()
-                        _text = PRONOUN_SPECIAL_CASES.get(_text, _text)
-                        
-                        self.persona_count_dict[_text] += 1
-                        self.entity_match_count_dict[_text][str(_span).lower()] += 1
+                if not in_coref_cluster:
 
-                        if _span.root.dep_ == 'nsubj':
-                            _verb = _span.root.head.lemma_.lower()
-                            nsubj_verb_count_dict[(_text, _verb)] += 1
+                    _text = _noun_chunk.text.lower().strip(',.!?\'"')
+                    _text = re.sub(r'^(my|his|her|their|our|your|the|a|an) ', '', _text)
 
-                        elif _span.root.dep_ == 'dobj':
-                            _verb = _span.root.head.lemma_.lower()
-                            dobj_verb_count_dict[(_text, _verb)] += 1
+                    self.persona_count_dict[_text] += 1
+                    self.entity_match_count_dict[_text][str(_noun_chunk).lower()] += 1
+
+                    if _noun_chunk.root.dep_ == 'nsubj':
+                        _verb = _noun_chunk.root.head.lemma_.lower()
+                        nsubj_verb_count_dict[(_text, _verb)] += 1
+
+                    elif _noun_chunk.root.dep_ == 'dobj':
+                        _verb = _noun_chunk.root.head.lemma_.lower()
+                        dobj_verb_count_dict[(_text, _verb)] += 1
+
 
         return nsubj_verb_count_dict, dobj_verb_count_dict
 
