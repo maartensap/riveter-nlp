@@ -35,7 +35,7 @@ To skip local installation and get started immediately, you can using [this Goog
 
 ### Installation instructions
 
-These instructions have been tested on OSX and Windows machines. We have not tested these instructions in Colab or other environments.
+These instructions have been tested on OSX machines. We have not tested these instructions in other environments.
 
 1. We strongly recommend creating a new virtual environment. Activate this environment before installing and before running the code.
 
