@@ -18,13 +18,11 @@ Check out our demo notebook here: [link]([https://github.com/maartensap/riveter-
 
 <br>
 
-## Quick Start
+## Installation
+
+### Quick start
 
 To skip local installation and get started immediately, you can using [this Google Colab notebook](https://colab.research.google.com/drive/19akZ2Qu7uva8jOsc49e_2HJmDo88WAXm?usp=sharing).
-
-<br>
-
-## Installation
 
 ### Requirements 
 
