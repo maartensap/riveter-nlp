@@ -14,9 +14,15 @@ The name Riveter is inspired by ["Rosie the Riveter,"](https://en.wikipedia.org/
 
 Watch our two minute demo video here: [link](https://youtu.be/Uftyd8eCmFw)
 
-Check out our demo notebook here: [link](https://github.com/maartensap/riveter-nlp/blob/main/riveter/demo.ipynb)
+Check out our demo notebook here: [link]([https://github.com/maartensap/riveter-nlp/blob/main/riveter/demo.ipynb](https://colab.research.google.com/drive/19akZ2Qu7uva8jOsc49e_2HJmDo88WAXm?usp=sharing))
 
 <br>
+
+## Quick Start
+
+To skip local installation and get started immediately, you can using [this Google Colab notebook](https://colab.research.google.com/drive/19akZ2Qu7uva8jOsc49e_2HJmDo88WAXm?usp=sharing).
+
+<rb>
 
 ## Installation
 
