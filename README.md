@@ -71,7 +71,7 @@ conda install seaborn
 
 ## Usage
 
-To use Riveter 💪, see the examples in [our demo notebook](https://github.com/maartensap/riveter-nlp/blob/main/riveter/demo.ipynb). 
+To use Riveter 💪, see the examples in [our demo notebook]([https://github.com/maartensap/riveter-nlp/blob/main/riveter/demo.ipynb](https://github.com/maartensap/riveter-nlp/blob/main/riveter/demo.ipynb](https://colab.research.google.com/drive/19akZ2Qu7uva8jOsc49e_2HJmDo88WAXm?usp=sharing)). 
 
 This notebook includes both toy and realistic examples and all of the most important function calls.
 
@@ -84,7 +84,7 @@ riveter.train(texts,
 persona_score_dict = riveter.get_score_totals()  
 ```
 
-*Note: [Here](https://towardsdatascience.com/get-your-conda-environment-to-show-in-jupyter-notebooks-the-easy-way-17010b76e874) are some instructions for how to run `demo.ipynb` from the riveterEnv.*
+*Note: [Here](https://towardsdatascience.com/get-your-conda-environment-to-show-in-jupyter-notebooks-the-easy-way-17010b76e874) are some instructions for how to run `demo.ipynb` from the riveterEnv conda environment that you created during installation.*
 
 <br>
 
