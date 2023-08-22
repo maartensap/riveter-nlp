@@ -1,6 +1,5 @@
 from .riveter import (
   Riveter,
-  load_lexicon,
   load_rashkin_lexicon,
   load_sap_lexicon,
   train,
