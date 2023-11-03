@@ -71,7 +71,7 @@ conda install seaborn
 
 ## Usage
 
-To use Riveter 💪, see the examples in [our demo notebook]([https://github.com/maartensap/riveter-nlp/blob/main/riveter/demo.ipynb](https://github.com/maartensap/riveter-nlp/blob/main/riveter/demo.ipynb](https://colab.research.google.com/drive/19akZ2Qu7uva8jOsc49e_2HJmDo88WAXm?usp=sharing)). 
+To use Riveter 💪, see the examples in [our demo notebook](https://github.com/maartensap/riveter-nlp/blob/main/riveter/demo.ipynb](https://github.com/maartensap/riveter-nlp/blob/main/riveter/demo.ipynb](https://colab.research.google.com/drive/19akZ2Qu7uva8jOsc49e_2HJmDo88WAXm?usp=sharing). 
 
 This notebook includes both toy and realistic examples and all of the most important function calls.
 
