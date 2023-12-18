@@ -285,7 +285,7 @@ Find all the documents matched to the persona.
 
 ## Authorship and Citation
 
-This package was created by an interdiscplinary team including [Maria Antoniak](https://maria-antoniak.github.io/), [Anjalie Field](https://anjalief.github.io/), Jimin Mun, [Melanie Walsh](https://melaniewalsh.org/), [Lauren F. Klein](https://lklein.com/), and [Maarten Sap](https://maartensap.com/). You can find our paper writeup at the following URL: http://maartensap.com/pdfs/antoniak2023riveter.pdf
+This package was created by an interdisciplinary team including [Maria Antoniak](https://maria-antoniak.github.io/), [Anjalie Field](https://anjalief.github.io/), Jimin Mun, [Melanie Walsh](https://melaniewalsh.org/), [Lauren F. Klein](https://lklein.com/), and [Maarten Sap](https://maartensap.com/). You can find our paper writeup at the following URL: http://maartensap.com/pdfs/antoniak2023riveter.pdf
 
 Use the following BibTex to cite the paper:
 ```bibtex
