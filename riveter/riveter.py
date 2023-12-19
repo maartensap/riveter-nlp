@@ -60,6 +60,7 @@ class Riveter:
 
     def __init__(self, filename=None):
         self.texts = None
+        self.text_ids = None
         self.verb_score_dict = None
         self.persona_score_dict = None
         self.persona_sd_dict = None
